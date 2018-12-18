@@ -235,9 +235,18 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 
 					SetTextColor(DeviceContextHandle, BLACK_COLOR);
 
-					Rectangle(DeviceContextHandle, 0 + 1, ClientRectangle.top + 1 - WindowScrollY, 200 - 1, ClientRectangle.bottom - 1 - WindowScrollY);
-					Rectangle(DeviceContextHandle, 200 + 1, ClientRectangle.top + 1, 240 - 1, ClientRectangle.bottom - 1);
+					if (Rectangle(DeviceContextHandle, 0 + 1, ClientRectangle.top + 1 - WindowScrollY, 200 - 1, ClientRectangle.bottom - 1 - WindowScrollY) != TRUE)
+					{
+						std::wstring Error(L"Неудача при попытке рисования.");
 
+						Result = 1;
+					}
+					if (Rectangle(DeviceContextHandle, 200 + 1, ClientRectangle.top + 1, 240 - 1, ClientRectangle.bottom - 1) != TRUE)
+					{
+						std::wstring Error(L"Неудача при попытке рисования.");
+
+						Result = 1;
+					}
 
 					if (MemoryLeaksDebugingDone)
 					{
@@ -256,15 +265,22 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 									{
 										if (y + 1 - 30 / 2 - WindowScrollY >= ClientRectangle.top && y - 1 + 30 / 2 - WindowScrollY <= ClientRectangle.bottom)
 										{
-											Rectangle(DeviceContextHandle, 0 + 1, y + 1 - 30 / 2 - WindowScrollY, 200 - 1, y - 1 + 30 / 2 - WindowScrollY);
+											if (Rectangle(DeviceContextHandle, 0 + 1, y + 1 - 30 / 2 - WindowScrollY, 200 - 1, y - 1 + 30 / 2 - WindowScrollY) != TRUE)
+											{
+												std::wstring Error(L"Неудача при попытке рисования.");
+
+												Result = 1;
+
+												break;
+											}
 										}
 
 										if (y - WindowScrollY >= ClientRectangle.top && y - WindowScrollY <= ClientRectangle.bottom)
 										{
-											Constant WCHAR *Text = Iterator->c_str();
-											Integer TextLength = Integer(Iterator->length());
+											Constant std::wstring Text = *Iterator;
+											Integer TextLength = Integer(Text.length());
 
-											if (TextOutW(DeviceContextHandle, x + 10, y - WindowScrollY, Text, TextLength) != TRUE)
+											if (TextOutW(DeviceContextHandle, x + 10, y - WindowScrollY, Text.c_str(), TextLength) != TRUE)
 											{
 												std::wstring Error(L"Неудача при попытке рисования.");
 
@@ -323,18 +339,28 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 											{
 												if (y + 1 - 30 / 2 - WindowScrollY >= ClientRectangle.top && y - 1 + 30 / 2 - WindowScrollY <= ClientRectangle.bottom)
 												{
-													Rectangle(DeviceContextHandle, 0 + 1, y + 1 - 30 / 2 - WindowScrollY, 200 - 1, y - 1 + 30 / 2 - WindowScrollY);
-												}
-
-												if (y - WindowScrollY >= ClientRectangle.top && y - WindowScrollY <= ClientRectangle.bottom)
-												{
-													Constant WCHAR *Text = Iterator->c_str();
-													Integer TextLength = Integer(Iterator->length());
-													if (TextOutW(DeviceContextHandle, x + 10, y - WindowScrollY, Text, TextLength) != TRUE)
+													if (Rectangle(DeviceContextHandle, 0 + 1, y + 1 - 30 / 2 - WindowScrollY, 200 - 1, y - 1 + 30 / 2 - WindowScrollY) != TRUE)
 													{
 														std::wstring Error(L"Неудача при попытке рисования.");
 
 														Result = 1;
+
+														break;
+													}
+
+												}
+
+												if (y - WindowScrollY >= ClientRectangle.top && y - WindowScrollY <= ClientRectangle.bottom)
+												{
+													Constant std::wstring Text = *Iterator;
+													Integer TextLength = Integer(Text.length());
+													if (TextOutW(DeviceContextHandle, x + 10, y - WindowScrollY, Text.c_str(), TextLength) != TRUE)
+													{
+														std::wstring Error(L"Неудача при попытке рисования.");
+
+														Result = 1;
+
+														break;
 													}
 												}
 
@@ -380,6 +406,8 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 						if (TextOutW(DeviceContextHandle, 250, 16, ClockCity.c_str(), ClockCityLength) != TRUE)
 						{
 							std::wstring Error(L"Неудача при попытке рисования.");
+
+							Result = 1;
 						}
 
 						Integer CurrentTimeLength = Integer(CurrentTime.length());
@@ -387,6 +415,8 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 						if (TextOutW(DeviceContextHandle, 250, 16 + 30, CurrentTime.c_str(), CurrentTimeLength) != TRUE)
 						{
 							std::wstring Error(L"Неудача при попытке рисования.");
+
+							Result = 1;
 						}
 					}
 
@@ -413,6 +443,8 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 						if (TextOutW(DeviceContextHandle, 250, 16 + 30 + 30, ClockCity.c_str(), ClockCityLength) != TRUE)
 						{
 							std::wstring Error(L"Неудача при попытке рисования.");
+
+							Result = 1;
 						}
 
 						Integer CurrentTimeLength = Integer(CurrentTime.length());
@@ -420,13 +452,25 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 						if (TextOutW(DeviceContextHandle, 250, 16 + 30 + 30 + 30, CurrentTime.c_str(), CurrentTimeLength) != TRUE)
 						{
 							std::wstring Error(L"Неудача при попытке рисования.");
+
+							Result = 1;
 						}
 
 						if (MemoryLeaksDebugingDone)
 						{
-							Rectangle(DeviceContextHandle, 250, 16 + 30 + 30 + 30 + 50, 250 + 210, 16 + 30 + 30 + 30 + 50 + 100);
+							if (Rectangle(DeviceContextHandle, 250, 16 + 30 + 30 + 30 + 50, 250 + 210, 16 + 30 + 30 + 30 + 50 + 100) != TRUE)
+							{
+								std::wstring Error(L"Неудача при попытке рисования.");
 
-							Rectangle(DeviceContextHandle, 250 + 40, 16 + 30 + 30 + 30 + 50, 250 + 210 - 40, 16 + 30 + 30 + 30 + 50 + 100);
+								Result = 1;
+							}
+
+							if (Rectangle(DeviceContextHandle, 250 + 40, 16 + 30 + 30 + 30 + 50, 250 + 210 - 40, 16 + 30 + 30 + 30 + 50 + 100) != TRUE)
+							{
+								std::wstring Error(L"Неудача при попытке рисования.");
+
+								Result = 1;
+							}
 
 							std::wstring CurrentDay = FormatDay(CalendarTime.wDay);
 							std::wstring CurrentDayOfWeek = FormatDayOfWeek(CalendarTime.wDayOfWeek);
@@ -436,6 +480,8 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 							if (TextOutW(DeviceContextHandle, 250 + 40 + 10, 16 + 30 + 30 + 30 + 50 + 16 / 2, CurrentDayOfWeek.c_str(), CurrentDayOfWeekLength) != TRUE)
 							{
 								std::wstring Error(L"Неудача при попытке рисования.");
+
+								Result = 1;
 							}
 
 
@@ -455,6 +501,8 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 							if (TextOutW(DeviceContextHandle, 250 + 40 + 10, 16 + 30 + 30 + 30 + 50 + 16 / 2 + 30, CurrentDay.c_str(), CurrentDayLength) != TRUE)
 							{
 								std::wstring Error(L"Неудача при попытке рисования.");
+
+								Result = 1;
 							}
 
 							SelectFont(DeviceContextHandle, FontOld);
@@ -468,6 +516,8 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 							if (TextOutW(DeviceContextHandle, 250 + 10, 16 + 30 + 30 + 30 + 50 + 16 / 2 + 30, CurrentBackward.c_str(), CurrentBackwardLength) != TRUE)
 							{
 								std::wstring Error(L"Неудача при попытке рисования.");
+
+								Result = 1;
 							}
 
 							WORD ForwardArrow = 0x02C3;
@@ -479,14 +529,46 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 							if (TextOutW(DeviceContextHandle, 250 + 210 - 40 + 10, 16 + 30 + 30 + 30 + 50 + 16 / 2 + 30, CurrentForward.c_str(), CurrentForwardLength) != TRUE)
 							{
 								std::wstring Error(L"Неудача при попытке рисования.");
+
+								Result = 1;
 							}
 
-							Rectangle(DeviceContextHandle, 250, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 0, 250 + 40 * 7, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 1);
-							Rectangle(DeviceContextHandle, 250, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 1, 250 + 40 * 7, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 2);
-							Rectangle(DeviceContextHandle, 250, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 2, 250 + 40 * 7, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 3);
-							Rectangle(DeviceContextHandle, 250, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 3, 250 + 40 * 7, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 4);
-							Rectangle(DeviceContextHandle, 250, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 4, 250 + 40 * 7, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 5);
-							Rectangle(DeviceContextHandle, 250, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 5, 250 + 40 * 7, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6);
+							if (Rectangle(DeviceContextHandle, 250, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 0, 250 + 40 * 7, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 1) != TRUE)
+							{
+								std::wstring Error(L"Неудача при попытке рисования.");
+
+								Result = 1;
+							}
+							if (Rectangle(DeviceContextHandle, 250, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 1, 250 + 40 * 7, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 2) != TRUE)
+							{
+								std::wstring Error(L"Неудача при попытке рисования.");
+
+								Result = 1;
+							}
+							if (Rectangle(DeviceContextHandle, 250, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 2, 250 + 40 * 7, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 3) != TRUE)
+							{
+								std::wstring Error(L"Неудача при попытке рисования.");
+
+								Result = 1;
+							}
+							if (Rectangle(DeviceContextHandle, 250, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 3, 250 + 40 * 7, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 4) != TRUE)
+							{
+								std::wstring Error(L"Неудача при попытке рисования.");
+
+								Result = 1;
+							}
+							if (Rectangle(DeviceContextHandle, 250, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 4, 250 + 40 * 7, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 5) != TRUE)
+							{
+								std::wstring Error(L"Неудача при попытке рисования.");
+
+								Result = 1;
+							}
+							if (Rectangle(DeviceContextHandle, 250, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 5, 250 + 40 * 7, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6) != TRUE)
+							{
+								std::wstring Error(L"Неудача при попытке рисования.");
+
+								Result = 1;
+							}
 
 
 							std::list<std::list<std::wstring>> CalendarMonthStrings;
@@ -557,6 +639,10 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 									if (TextOutW(DeviceContextHandle, 250 + 40 * X, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * Y, CurrentMonthCalendarDay.c_str(), CurrentMonthCalendarDayLength) != TRUE)
 									{
 										std::wstring Error(L"Неудача при попытке рисования.");
+
+										Result = 1;
+
+										break;
 									}
 
 									X++;
@@ -574,6 +660,8 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 							if (TextOutW(DeviceContextHandle, 250, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20, CurrentMonth.c_str(), CurrentMonthLength) != TRUE)
 							{
 								std::wstring Error(L"Неудача при попытке рисования.");
+
+								Result = 1;
 							}
 
 							std::wstring CurrentYear = FormatYear(CalendarTime.wYear);
@@ -582,12 +670,24 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 							if (TextOutW(DeviceContextHandle, 250, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20, CurrentYear.c_str(), CurrentYearLength) != TRUE)
 							{
 								std::wstring Error(L"Неудача при попытке рисования.");
+
+								Result = 1;
 							}
 
 							SelectFont(DeviceContextHandle, FontOld);
 
-							Rectangle(DeviceContextHandle, 250 + 40 * 7, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20, 250 + 40 * 7 + 40, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 30);
-							Rectangle(DeviceContextHandle, 250 + 40 * 7, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 30 + 5, 250 + 40 * 7 + 40, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 30 + 5 + 30);
+							if (Rectangle(DeviceContextHandle, 250 + 40 * 7, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20, 250 + 40 * 7 + 40, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 30) != TRUE)
+							{
+								std::wstring Error(L"Неудача при попытке рисования.");
+
+								Result = 1;
+							}
+							if (Rectangle(DeviceContextHandle, 250 + 40 * 7, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 30 + 5, 250 + 40 * 7 + 40, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 30 + 5 + 30) != TRUE)
+							{
+								std::wstring Error(L"Неудача при попытке рисования.");
+
+								Result = 1;
+							}
 
 							WORD UpArrow = 0x02C4;
 							std::wstring CurrentUp;
@@ -596,6 +696,8 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 							if (TextOutW(DeviceContextHandle, 250 + 40 * 7 + 10, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 10, CurrentUp.c_str(), CurrentUpLength) != TRUE)
 							{
 								std::wstring Error(L"Неудача при попытке рисования.");
+
+								Result = 1;
 							}
 
 							WORD DownArrow = 0x02C5;
@@ -605,6 +707,8 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 							if (TextOutW(DeviceContextHandle, 250 + 40 * 7 + 10, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 30 + 10, CurrentDown.c_str(), CurrentDownLength) != TRUE)
 							{
 								std::wstring Error(L"Неудача при попытке рисования.");
+
+								Result = 1;
 							}
 
 							if (DeleteObject(Font) != TRUE)
@@ -657,6 +761,8 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 							if (TextOutW(DeviceContextHandle, ClientRectangle.right - CurrentNumberLength * 10, ClientRectangle.bottom - 30, CurrentNumber.c_str(), CurrentNumberLength) != TRUE)
 							{
 								std::wstring Error(L"Неудача при попытке рисования.");
+
+								Result = 1;
 							}
 						}
 					}
@@ -819,7 +925,10 @@ LRESULT LeftMouseButtonPressed(HWND p1, UINT p2, WPARAM p3, LPARAM p4)
 			}
 		}
 
-		Result = Render(p1, x, y);
+		if (!Rendering)
+		{
+			Result = Render(p1, x, y);
+		}
 	}
 	else
 	{
@@ -839,7 +948,10 @@ LRESULT LeftMouseButtonPressed(HWND p1, UINT p2, WPARAM p3, LPARAM p4)
 
 				CalendarTimeCurrent.GetAsSystemTime(CalendarTime);
 
-				Result = Render(p1, x, y);
+				if (!Rendering)
+				{
+					Result = Render(p1, x, y);
+				}
 			}
 			else
 			{
@@ -853,7 +965,10 @@ LRESULT LeftMouseButtonPressed(HWND p1, UINT p2, WPARAM p3, LPARAM p4)
 
 					CalendarTimeCurrent.GetAsSystemTime(CalendarTime);
 
-					Result = Render(p1, x, y);
+					if (!Rendering)
+					{
+						Result = Render(p1, x, y);
+					}
 				}
 				else
 				{
@@ -887,7 +1002,10 @@ LRESULT LeftMouseButtonPressed(HWND p1, UINT p2, WPARAM p3, LPARAM p4)
 
 						CalendarTimeCurrent.GetAsSystemTime(CalendarTime);
 
-						Result = Render(p1, x, y);
+						if (!Rendering)
+						{
+							Result = Render(p1, x, y);
+						}
 					}
 					else
 					{
@@ -921,14 +1039,20 @@ LRESULT LeftMouseButtonPressed(HWND p1, UINT p2, WPARAM p3, LPARAM p4)
 
 							CalendarTimeCurrent.GetAsSystemTime(CalendarTime);
 
-							Result = Render(p1, x, y);
+							if (!Rendering)
+							{
+								Result = Render(p1, x, y);
+							}
 						}
 						else
 						{
 							CurrentTable = std::wstring();
 							WindowScrollY = 0;
 
-							Result = Render(p1, x, y);
+							if (!Rendering)
+							{
+								Result = Render(p1, x, y);
+							}
 						}
 					}
 				}
