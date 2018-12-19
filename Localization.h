@@ -20,6 +20,7 @@ const std::wstring CurrentFrameString(L", текущий кадр ");
 const std::wstring PointString(L".");
 
 const std::wstring CatalogString(L"Каталог");
+const std::wstring CatalogBaseString = CatalogString + std::wstring(L"\\");
 
 const std::wstring DayOfWeekListMondayString(L"Понедельник");
 const std::wstring DayOfWeekListTuesdayString(L"Вторник");
@@ -42,11 +43,11 @@ const std::wstring MonthListOctoberString(L"Октябрь");
 const std::wstring MonthListNovemberString(L"Ноябрь");
 const std::wstring MonthListDecemberString(L"Декабрь");
 
-const std::wstring NominativeDayOfWeekDirectoryString(L"Каталог\\Стандарты\\Время\\Именительный\\День недели");
-const std::wstring NominativeMonthsDirectoryString(L"Каталог\\Стандарты\\Время\\Именительный\\Месяцы");
-const std::wstring NominativeMonthDirectoryString(L"Каталог\\Стандарты\\Время\\Именительный\\Месяц");
+const std::wstring NominativeDayOfWeekDirectoryString = CatalogBaseString + std::wstring(L"Стандарты\\Время\\Именительный\\День недели");
+const std::wstring NominativeMonthsDirectoryString = CatalogBaseString + std::wstring(L"Стандарты\\Время\\Именительный\\Месяцы");
+const std::wstring NominativeMonthDirectoryString = CatalogBaseString + std::wstring(L"Стандарты\\Время\\Именительный\\Месяц");
 
-const std::wstring GenitiveYearDirectoryString(L"Каталог\\Стандарты\\Время\\Родительный\\Год");
-const std::wstring GenitiveMonthsDirectoryString(L"Каталог\\Стандарты\\Время\\Родительный\\Месяцы");
-const std::wstring GenitiveMonthDirectoryString(L"Каталог\\Стандарты\\Время\\Родительный\\Месяц");
-const std::wstring GenitiveDayDirectoryString(L"Каталог\\Стандарты\\Время\\Родительный\\День");
+const std::wstring GenitiveYearDirectoryString = CatalogBaseString + std::wstring(L"Стандарты\\Время\\Родительный\\Год");
+const std::wstring GenitiveMonthsDirectoryString = CatalogBaseString + std::wstring(L"Стандарты\\Время\\Родительный\\Месяцы");
+const std::wstring GenitiveMonthDirectoryString = CatalogBaseString + std::wstring(L"Стандарты\\Время\\Родительный\\Месяц");
+const std::wstring GenitiveDayDirectoryString = CatalogBaseString + std::wstring(L"Стандарты\\Время\\Родительный\\День");
