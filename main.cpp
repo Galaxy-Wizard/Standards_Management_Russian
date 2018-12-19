@@ -6,7 +6,18 @@
 #include <atltime.h>
 
 #include "Manager.h"
+
+#ifdef Russian
 #include "Localization.h"
+#else // Russian
+#ifdef English
+#include "English\Localization.h"
+#else // Russian
+#error Localization does not exist.
+#endif // English
+
+#endif // Russian
+
 
 
 const bool MemoryLeaksDebuging = true;
