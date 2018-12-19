@@ -94,6 +94,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Localization.h" />
     <ClInclude Include="Manager.h" />
   </ItemGroup>
   <ItemGroup>

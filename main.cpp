@@ -3,10 +3,11 @@
 #include <windowsx.h>
 #include <fileapi.h>
 
+#include <atltime.h>
 
 #include "Manager.h"
+#include "Localization.h"
 
-#include <atltime.h>
 
 const bool MemoryLeaksDebuging = true;
 const bool MemoryLeaksDebugingDone = true;
@@ -36,7 +37,7 @@ DWORD RenderFrequency = 0;
 DWORD FramesPerSecond = 1;
 
 std::list<std::wstring> CurrentStandardsManager;
-std::wstring CurrentDirectory(L"Каталог");
+std::wstring CurrentDirectory(CatalogString);
 std::wstring CurrentTable;
 
 std::wstring BaseDirectory;
@@ -61,7 +62,7 @@ Integer WINAPI WinMain(HINSTANCE Instance, HINSTANCE, LPSTR, Integer)
 
 	RegisterClassExW(&WindowClass);
 
-	HWND WindowHandle = CreateWindowW(L"WindowClass", L"Управление стандартами",
+	HWND WindowHandle = CreateWindowW(L"WindowClass", WindowCaptionString.c_str(),
 		WS_OVERLAPPEDWINDOW | WS_POPUP,
 		0, 0, 700, 900, GetDesktopWindow(), NULL, WindowClass.hInstance, NULL);
 
@@ -237,13 +238,13 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 
 					if (Rectangle(DeviceContextHandle, 0 + 1, ClientRectangle.top + 1 - WindowScrollY, 200 - 1, ClientRectangle.bottom - 1 - WindowScrollY) != TRUE)
 					{
-						std::wstring Error(L"Неудача при попытке рисования.");
+						std::wstring Error(ErrorDrawingString);
 
 						Result = 1;
 					}
 					if (Rectangle(DeviceContextHandle, 200 + 1, ClientRectangle.top + 1, 240 - 1, ClientRectangle.bottom - 1) != TRUE)
 					{
-						std::wstring Error(L"Неудача при попытке рисования.");
+						std::wstring Error(ErrorDrawingString);
 
 						Result = 1;
 					}
@@ -267,7 +268,7 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 										{
 											if (Rectangle(DeviceContextHandle, 0 + 1, y + 1 - 30 / 2 - WindowScrollY, 200 - 1, y - 1 + 30 / 2 - WindowScrollY) != TRUE)
 											{
-												std::wstring Error(L"Неудача при попытке рисования.");
+												std::wstring Error(ErrorDrawingString);
 
 												Result = 1;
 
@@ -282,7 +283,7 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 
 											if (TextOutW(DeviceContextHandle, x + 10, y - WindowScrollY, Text.c_str(), TextLength) != TRUE)
 											{
-												std::wstring Error(L"Неудача при попытке рисования.");
+												std::wstring Error(ErrorDrawingString);
 
 												Result = 1;
 												break;
@@ -341,7 +342,7 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 												{
 													if (Rectangle(DeviceContextHandle, 0 + 1, y + 1 - 30 / 2 - WindowScrollY, 200 - 1, y - 1 + 30 / 2 - WindowScrollY) != TRUE)
 													{
-														std::wstring Error(L"Неудача при попытке рисования.");
+														std::wstring Error(ErrorDrawingString);
 
 														Result = 1;
 
@@ -356,7 +357,7 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 													Integer TextLength = Integer(Text.length());
 													if (TextOutW(DeviceContextHandle, x + 10, y - WindowScrollY, Text.c_str(), TextLength) != TRUE)
 													{
-														std::wstring Error(L"Неудача при попытке рисования.");
+														std::wstring Error(ErrorDrawingString);
 
 														Result = 1;
 
@@ -370,7 +371,7 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 										}
 										else
 										{
-											std::wstring Error(L"Неудача при попытке чтения файла.");
+											std::wstring Error(ErrorReadingFileString);
 
 											Result = 1;
 										}
@@ -398,14 +399,14 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 						WORD Minute = SystemTime.wMinute;
 						WORD Second = SystemTime.wSecond;
 
-						std::wstring ClockCity(L"Лондонское время:");
+						std::wstring ClockCity(LondonTimeString);
 						std::wstring CurrentTime = FormatTime(Year, Month, Day, DayOfWeek, Hour, Minute, Second);
 
 						Integer ClockCityLength = Integer(ClockCity.length());
 
 						if (TextOutW(DeviceContextHandle, 250, 16, ClockCity.c_str(), ClockCityLength) != TRUE)
 						{
-							std::wstring Error(L"Неудача при попытке рисования.");
+							std::wstring Error(ErrorDrawingString);
 
 							Result = 1;
 						}
@@ -414,7 +415,7 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 
 						if (TextOutW(DeviceContextHandle, 250, 16 + 30, CurrentTime.c_str(), CurrentTimeLength) != TRUE)
 						{
-							std::wstring Error(L"Неудача при попытке рисования.");
+							std::wstring Error(ErrorDrawingString);
 
 							Result = 1;
 						}
@@ -435,14 +436,14 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 						WORD Minute = LocalTime.wMinute;
 						WORD Second = LocalTime.wSecond;
 
-						std::wstring ClockCity(L"Местное время:");
+						std::wstring ClockCity(LocalTimeString);
 						std::wstring CurrentTime = FormatTime(Year, Month, Day, DayOfWeek, Hour, Minute, Second);
 
 						Integer ClockCityLength = Integer(ClockCity.length());
 
 						if (TextOutW(DeviceContextHandle, 250, 16 + 30 + 30, ClockCity.c_str(), ClockCityLength) != TRUE)
 						{
-							std::wstring Error(L"Неудача при попытке рисования.");
+							std::wstring Error(ErrorDrawingString);
 
 							Result = 1;
 						}
@@ -451,7 +452,7 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 
 						if (TextOutW(DeviceContextHandle, 250, 16 + 30 + 30 + 30, CurrentTime.c_str(), CurrentTimeLength) != TRUE)
 						{
-							std::wstring Error(L"Неудача при попытке рисования.");
+							std::wstring Error(ErrorDrawingString);
 
 							Result = 1;
 						}
@@ -460,14 +461,14 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 						{
 							if (Rectangle(DeviceContextHandle, 250, 16 + 30 + 30 + 30 + 50, 250 + 210, 16 + 30 + 30 + 30 + 50 + 100) != TRUE)
 							{
-								std::wstring Error(L"Неудача при попытке рисования.");
+								std::wstring Error(ErrorDrawingString);
 
 								Result = 1;
 							}
 
 							if (Rectangle(DeviceContextHandle, 250 + 40, 16 + 30 + 30 + 30 + 50, 250 + 210 - 40, 16 + 30 + 30 + 30 + 50 + 100) != TRUE)
 							{
-								std::wstring Error(L"Неудача при попытке рисования.");
+								std::wstring Error(ErrorDrawingString);
 
 								Result = 1;
 							}
@@ -479,7 +480,7 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 
 							if (TextOutW(DeviceContextHandle, 250 + 40 + 10, 16 + 30 + 30 + 30 + 50 + 16 / 2, CurrentDayOfWeek.c_str(), CurrentDayOfWeekLength) != TRUE)
 							{
-								std::wstring Error(L"Неудача при попытке рисования.");
+								std::wstring Error(ErrorDrawingString);
 
 								Result = 1;
 							}
@@ -500,7 +501,7 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 
 							if (TextOutW(DeviceContextHandle, 250 + 40 + 10, 16 + 30 + 30 + 30 + 50 + 16 / 2 + 30, CurrentDay.c_str(), CurrentDayLength) != TRUE)
 							{
-								std::wstring Error(L"Неудача при попытке рисования.");
+								std::wstring Error(ErrorDrawingString);
 
 								Result = 1;
 							}
@@ -515,7 +516,7 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 
 							if (TextOutW(DeviceContextHandle, 250 + 10, 16 + 30 + 30 + 30 + 50 + 16 / 2 + 30, CurrentBackward.c_str(), CurrentBackwardLength) != TRUE)
 							{
-								std::wstring Error(L"Неудача при попытке рисования.");
+								std::wstring Error(ErrorDrawingString);
 
 								Result = 1;
 							}
@@ -528,44 +529,44 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 
 							if (TextOutW(DeviceContextHandle, 250 + 210 - 40 + 10, 16 + 30 + 30 + 30 + 50 + 16 / 2 + 30, CurrentForward.c_str(), CurrentForwardLength) != TRUE)
 							{
-								std::wstring Error(L"Неудача при попытке рисования.");
+								std::wstring Error(ErrorDrawingString);
 
 								Result = 1;
 							}
 
 							if (Rectangle(DeviceContextHandle, 250, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 0, 250 + 40 * 7, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 1) != TRUE)
 							{
-								std::wstring Error(L"Неудача при попытке рисования.");
+								std::wstring Error(ErrorDrawingString);
 
 								Result = 1;
 							}
 							if (Rectangle(DeviceContextHandle, 250, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 1, 250 + 40 * 7, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 2) != TRUE)
 							{
-								std::wstring Error(L"Неудача при попытке рисования.");
+								std::wstring Error(ErrorDrawingString);
 
 								Result = 1;
 							}
 							if (Rectangle(DeviceContextHandle, 250, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 2, 250 + 40 * 7, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 3) != TRUE)
 							{
-								std::wstring Error(L"Неудача при попытке рисования.");
+								std::wstring Error(ErrorDrawingString);
 
 								Result = 1;
 							}
 							if (Rectangle(DeviceContextHandle, 250, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 3, 250 + 40 * 7, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 4) != TRUE)
 							{
-								std::wstring Error(L"Неудача при попытке рисования.");
+								std::wstring Error(ErrorDrawingString);
 
 								Result = 1;
 							}
 							if (Rectangle(DeviceContextHandle, 250, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 4, 250 + 40 * 7, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 5) != TRUE)
 							{
-								std::wstring Error(L"Неудача при попытке рисования.");
+								std::wstring Error(ErrorDrawingString);
 
 								Result = 1;
 							}
 							if (Rectangle(DeviceContextHandle, 250, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 5, 250 + 40 * 7, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6) != TRUE)
 							{
-								std::wstring Error(L"Неудача при попытке рисования.");
+								std::wstring Error(ErrorDrawingString);
 
 								Result = 1;
 							}
@@ -638,7 +639,7 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 
 									if (TextOutW(DeviceContextHandle, 250 + 40 * X, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * Y, CurrentMonthCalendarDay.c_str(), CurrentMonthCalendarDayLength) != TRUE)
 									{
-										std::wstring Error(L"Неудача при попытке рисования.");
+										std::wstring Error(ErrorDrawingString);
 
 										Result = 1;
 
@@ -659,7 +660,7 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 
 							if (TextOutW(DeviceContextHandle, 250, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20, CurrentMonth.c_str(), CurrentMonthLength) != TRUE)
 							{
-								std::wstring Error(L"Неудача при попытке рисования.");
+								std::wstring Error(ErrorDrawingString);
 
 								Result = 1;
 							}
@@ -669,7 +670,7 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 
 							if (TextOutW(DeviceContextHandle, 250, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20, CurrentYear.c_str(), CurrentYearLength) != TRUE)
 							{
-								std::wstring Error(L"Неудача при попытке рисования.");
+								std::wstring Error(ErrorDrawingString);
 
 								Result = 1;
 							}
@@ -678,13 +679,13 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 
 							if (Rectangle(DeviceContextHandle, 250 + 40 * 7, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20, 250 + 40 * 7 + 40, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 30) != TRUE)
 							{
-								std::wstring Error(L"Неудача при попытке рисования.");
+								std::wstring Error(ErrorDrawingString);
 
 								Result = 1;
 							}
 							if (Rectangle(DeviceContextHandle, 250 + 40 * 7, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 30 + 5, 250 + 40 * 7 + 40, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 30 + 5 + 30) != TRUE)
 							{
-								std::wstring Error(L"Неудача при попытке рисования.");
+								std::wstring Error(ErrorDrawingString);
 
 								Result = 1;
 							}
@@ -695,7 +696,7 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 							Integer CurrentUpLength = Integer(CurrentUp.length());
 							if (TextOutW(DeviceContextHandle, 250 + 40 * 7 + 10, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 10, CurrentUp.c_str(), CurrentUpLength) != TRUE)
 							{
-								std::wstring Error(L"Неудача при попытке рисования.");
+								std::wstring Error(ErrorDrawingString);
 
 								Result = 1;
 							}
@@ -706,14 +707,14 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 							Integer CurrentDownLength = Integer(CurrentDown.length());
 							if (TextOutW(DeviceContextHandle, 250 + 40 * 7 + 10, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 30 + 10, CurrentDown.c_str(), CurrentDownLength) != TRUE)
 							{
-								std::wstring Error(L"Неудача при попытке рисования.");
+								std::wstring Error(ErrorDrawingString);
 
 								Result = 1;
 							}
 
 							if (DeleteObject(Font) != TRUE)
 							{
-								std::wstring Error(L"Неудача при попытке удаления шрифта.");
+								std::wstring Error(ErrorDeletingFontString);
 
 								Result = 1;
 							}
@@ -747,7 +748,7 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 							}
 							
 							std::wstring CurrentNumber;
-							CurrentNumber = std::wstring(L"Частота кадров ") + NumberRenderFrequency + std::wstring(L", текущий кадр ") + NumberRenderCurrentFrameNumber + std::wstring(L".");
+							CurrentNumber = std::wstring(FrameRateString) + NumberRenderFrequency + std::wstring(CurrentFrameString) + NumberRenderCurrentFrameNumber + std::wstring(PointString);
 
 							Integer CurrentNumberLength = Integer(CurrentNumber.length());
 
@@ -760,7 +761,7 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 
 							if (TextOutW(DeviceContextHandle, ClientRectangle.right - CurrentNumberLength * 10, ClientRectangle.bottom - 30, CurrentNumber.c_str(), CurrentNumberLength) != TRUE)
 							{
-								std::wstring Error(L"Неудача при попытке рисования.");
+								std::wstring Error(ErrorDrawingString);
 
 								Result = 1;
 							}
@@ -772,7 +773,7 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 
 					if (DeleteObject(Brush) != TRUE)
 					{
-						std::wstring Error(L"Неудача при попытке удаления кисти.");
+						std::wstring Error(ErrorDeletingBrushString);
 
 						Result = 1;
 					}
@@ -781,14 +782,14 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 
 				if (BitBlt(DeviceContextHandleWindow, ClientRectangle.left, ClientRectangle.top, ClientRectangle.right, ClientRectangle.bottom, DeviceContextHandle, 0, 0, SRCCOPY) != TRUE)
 				{
-					std::wstring Error(L"Неудача при попытке копировании контекста рисования из памяти.");
+					std::wstring Error(ErrorCopyingContextString);
 
 					Result = 1;
 				}
 
 				if (DeleteObject(BitMapHandle) != TRUE)
 				{
-					std::wstring Error(L"Неудача при попытке удаления холста.");
+					std::wstring Error(ErrorDeletingBitMapString);
 
 					Result = 1;
 				}
@@ -798,27 +799,27 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 
 			if (DeleteDC(DeviceContextHandle) != TRUE)
 			{
-				std::wstring Error(L"Неудача при попытке удаления контекста рисования в памяти.");
+				std::wstring Error(ErrorDeletingMemoryContextString);
 
 				Result = 1;
 			}
 		}
 		else
 		{
-			std::wstring Error(L"Неудача при попытке получения контекста рисования в памяти.");
+			std::wstring Error(ErrorCreatingMemoryContextString);
 			Result = 1;
 		}
 
 		if (DeleteDC(DeviceContextHandleWindow) != TRUE)
 		{
-			std::wstring Error(L"Неудача при попытке удаления контекста рисования.");
+			std::wstring Error(ErrorDeletingContextString);
 
 			Result = 1;
 		}
 	}
 	else
 	{
-		std::wstring Error(L"Неудача при попытке получения контекста рисования.");
+		std::wstring Error(ErrorCreatingMemoryContextString);
 		Result = 1;
 	}
 
@@ -868,7 +869,7 @@ LRESULT LeftMouseButtonPressed(HWND p1, UINT p2, WPARAM p3, LPARAM p4)
 		{
 			if (SelectedString == L".")
 			{
-				CurrentDirectory = L"Каталог";
+				CurrentDirectory = CatalogString;
 			}
 			else
 				if (SelectedString == L"..")
@@ -919,7 +920,7 @@ LRESULT LeftMouseButtonPressed(HWND p1, UINT p2, WPARAM p3, LPARAM p4)
 
 			if (CurrentDirectory.length() == 0)
 			{
-				CurrentDirectory = L"Каталог";
+				CurrentDirectory = CatalogString;
 
 				CurrentTable = std::wstring();
 			}
@@ -1085,8 +1086,8 @@ LRESULT WindowScroll(HWND p1, UINT p2, WPARAM p3, LPARAM p4)
 	return Result;
 }
 
-/*/
-std::wstring FormatTime(WORD Year, WORD Month, WORD Day, WORD DayOfWeek, WORD Hour, WORD Second)
+
+std::wstring FormatTimeLunarStyle(WORD Year, WORD Month, WORD Day, WORD DayOfWeek, WORD Hour, WORD Second)
 {
 	std::wstring Result;
 
@@ -1106,7 +1107,7 @@ std::wstring FormatTime(WORD Year, WORD Month, WORD Day, WORD DayOfWeek, WORD Ho
 	{
 		SetCurrentDirectoryW(BaseDirectory.c_str());
 
-		std::wstring DayDirectory(L"Каталог\\Стандарты\\Время\\Родительный\\День");
+		std::wstring DayDirectory(GenitiveDayDirectoryString);
 
 		std::list<std::wstring> CurrentDirectoryStandardsManager = StandardsManager.Select(DayDirectory);
 
@@ -1147,7 +1148,7 @@ std::wstring FormatTime(WORD Year, WORD Month, WORD Day, WORD DayOfWeek, WORD Ho
 	{
 		SetCurrentDirectoryW(BaseDirectory.c_str());
 
-		std::wstring MonthDirectory(L"Каталог\\Стандарты\\Время\\Родительный\\Месяц");
+		std::wstring MonthDirectory(GenitiveMonthDirectoryString);
 
 		std::list<std::wstring> CurrentDirectoryStandardsManager = StandardsManager.Select(MonthDirectory);
 
@@ -1188,7 +1189,7 @@ std::wstring FormatTime(WORD Year, WORD Month, WORD Day, WORD DayOfWeek, WORD Ho
 	{
 		SetCurrentDirectoryW(BaseDirectory.c_str());
 
-		std::wstring YearDirectory(L"Каталог\\Стандарты\\Время\\Родительный\\Год");
+		std::wstring YearDirectory(GenitiveYearDirectoryString);
 
 		std::list<std::wstring> CurrentDirectoryStandardsManager = StandardsManager.Select(YearDirectory);
 
@@ -1230,7 +1231,7 @@ std::wstring FormatTime(WORD Year, WORD Month, WORD Day, WORD DayOfWeek, WORD Ho
 
 	return Result;
 }
-/*/
+
 
 std::wstring FormatTime(WORD Year, WORD Month, WORD Day, WORD DayOfWeek, WORD Hour, WORD Minute, WORD Second)
 {
@@ -1252,13 +1253,13 @@ std::wstring FormatTime(WORD Year, WORD Month, WORD Day, WORD DayOfWeek, WORD Ho
 	{
 		std::list<std::wstring> DayOfWeekList;
 
-		DayOfWeekList.push_back(std::wstring(L"Понедельник"));
-		DayOfWeekList.push_back(std::wstring(L"Вторник"));
-		DayOfWeekList.push_back(std::wstring(L"Среда"));
-		DayOfWeekList.push_back(std::wstring(L"Четверг"));
-		DayOfWeekList.push_back(std::wstring(L"Пятница"));
-		DayOfWeekList.push_back(std::wstring(L"Суббота"));
-		DayOfWeekList.push_back(std::wstring(L"Воскресение"));
+		DayOfWeekList.push_back(DayOfWeekListMondayString);
+		DayOfWeekList.push_back(DayOfWeekListTuesdayString);
+		DayOfWeekList.push_back(DayOfWeekListWednesdayString);
+		DayOfWeekList.push_back(DayOfWeekListThursdayString);
+		DayOfWeekList.push_back(DayOfWeekListFridayString);
+		DayOfWeekList.push_back(DayOfWeekListSaturdayString);
+		DayOfWeekList.push_back(DayOfWeekListSundayString);
 
 		Automatic Iterator = DayOfWeekList.begin();
 
@@ -1283,7 +1284,7 @@ std::wstring FormatTime(WORD Year, WORD Month, WORD Day, WORD DayOfWeek, WORD Ho
 			Iterator = DayOfWeekList.begin();
 		}
 
-		std::wstring DayOfWeekDirectory(L"Каталог\\Стандарты\\Время\\Именительный\\День недели");
+		std::wstring DayOfWeekDirectory(NominativeDayOfWeekDirectoryString);
 
 		DayOfWeekDirectory += std::wstring(L"\\") + *Iterator;
 
@@ -1391,18 +1392,18 @@ std::wstring FormatTime(WORD Year, WORD Month, WORD Day, WORD DayOfWeek, WORD Ho
 
 		std::list<std::wstring> MonthList;
 
-		MonthList.push_back(std::wstring(L"Январь"));
-		MonthList.push_back(std::wstring(L"Февраль"));
-		MonthList.push_back(std::wstring(L"Март"));
-		MonthList.push_back(std::wstring(L"Апрель"));
-		MonthList.push_back(std::wstring(L"Май"));
-		MonthList.push_back(std::wstring(L"Июнь"));
-		MonthList.push_back(std::wstring(L"Июль"));
-		MonthList.push_back(std::wstring(L"Август"));
-		MonthList.push_back(std::wstring(L"Сентябрь"));
-		MonthList.push_back(std::wstring(L"Октябрь"));
-		MonthList.push_back(std::wstring(L"Ноябрь"));
-		MonthList.push_back(std::wstring(L"Декабрь"));
+		MonthList.push_back(MonthListJanuaryString);
+		MonthList.push_back(MonthListFebruaryString);
+		MonthList.push_back(MonthListMarchString);
+		MonthList.push_back(MonthListAprilString);
+		MonthList.push_back(MonthListMayString);
+		MonthList.push_back(MonthListJuneString);
+		MonthList.push_back(MonthListJulyString);
+		MonthList.push_back(MonthListAugustString);
+		MonthList.push_back(MonthListSeptemberString);
+		MonthList.push_back(MonthListOctoberString);
+		MonthList.push_back(MonthListNovemberString);
+		MonthList.push_back(MonthListDecemberString);
 
 		Automatic Iterator = MonthList.begin();
 
@@ -1411,7 +1412,7 @@ std::wstring FormatTime(WORD Year, WORD Month, WORD Day, WORD DayOfWeek, WORD Ho
 			Iterator++;
 		}
 
-		std::wstring MonthDirectory(L"Каталог\\Стандарты\\Время\\Родительный\\Месяцы");
+		std::wstring MonthDirectory(GenitiveMonthsDirectoryString);
 
 		MonthDirectory += std::wstring(L"\\") + *Iterator;
 
@@ -1445,7 +1446,7 @@ std::wstring FormatTime(WORD Year, WORD Month, WORD Day, WORD DayOfWeek, WORD Ho
 	{
 		SetCurrentDirectoryW(BaseDirectory.c_str());
 
-		std::wstring YearDirectory(L"Каталог\\Стандарты\\Время\\Родительный\\Год");
+		std::wstring YearDirectory(GenitiveYearDirectoryString);
 
 		std::list<std::wstring> CurrentDirectoryStandardsManager = StandardsManager.Select(YearDirectory);
 
@@ -1535,13 +1536,13 @@ std::wstring FormatDayOfWeek(WORD DayOfWeek)
 	{
 		std::list<std::wstring> DayOfWeekList;
 
-		DayOfWeekList.push_back(std::wstring(L"Понедельник"));
-		DayOfWeekList.push_back(std::wstring(L"Вторник"));
-		DayOfWeekList.push_back(std::wstring(L"Среда"));
-		DayOfWeekList.push_back(std::wstring(L"Четверг"));
-		DayOfWeekList.push_back(std::wstring(L"Пятница"));
-		DayOfWeekList.push_back(std::wstring(L"Суббота"));
-		DayOfWeekList.push_back(std::wstring(L"Воскресение"));
+		DayOfWeekList.push_back(DayOfWeekListMondayString);
+		DayOfWeekList.push_back(DayOfWeekListTuesdayString);
+		DayOfWeekList.push_back(DayOfWeekListWednesdayString);
+		DayOfWeekList.push_back(DayOfWeekListThursdayString);
+		DayOfWeekList.push_back(DayOfWeekListFridayString);
+		DayOfWeekList.push_back(DayOfWeekListSaturdayString);
+		DayOfWeekList.push_back(DayOfWeekListSundayString);
 
 		Automatic Iterator = DayOfWeekList.begin();
 
@@ -1566,7 +1567,7 @@ std::wstring FormatDayOfWeek(WORD DayOfWeek)
 			Iterator = DayOfWeekList.begin();
 		}
 
-		std::wstring DayOfWeekDirectory(L"Каталог\\Стандарты\\Время\\Именительный\\День недели");
+		std::wstring DayOfWeekDirectory(NominativeDayOfWeekDirectoryString);
 
 		DayOfWeekDirectory += std::wstring(L"\\") + *Iterator;
 
@@ -1623,18 +1624,18 @@ std::wstring FormatMonth(WORD Month)
 
 		std::list<std::wstring> MonthList;
 
-		MonthList.push_back(std::wstring(L"Январь"));
-		MonthList.push_back(std::wstring(L"Февраль"));
-		MonthList.push_back(std::wstring(L"Март"));
-		MonthList.push_back(std::wstring(L"Апрель"));
-		MonthList.push_back(std::wstring(L"Май"));
-		MonthList.push_back(std::wstring(L"Июнь"));
-		MonthList.push_back(std::wstring(L"Июль"));
-		MonthList.push_back(std::wstring(L"Август"));
-		MonthList.push_back(std::wstring(L"Сентябрь"));
-		MonthList.push_back(std::wstring(L"Октябрь"));
-		MonthList.push_back(std::wstring(L"Ноябрь"));
-		MonthList.push_back(std::wstring(L"Декабрь"));
+		MonthList.push_back(MonthListJanuaryString);
+		MonthList.push_back(MonthListFebruaryString);
+		MonthList.push_back(MonthListMarchString);
+		MonthList.push_back(MonthListAprilString);
+		MonthList.push_back(MonthListMayString);
+		MonthList.push_back(MonthListJuneString);
+		MonthList.push_back(MonthListJulyString);
+		MonthList.push_back(MonthListAugustString);
+		MonthList.push_back(MonthListSeptemberString);
+		MonthList.push_back(MonthListOctoberString);
+		MonthList.push_back(MonthListNovemberString);
+		MonthList.push_back(MonthListDecemberString);
 
 		Automatic Iterator = MonthList.begin();
 
@@ -1643,7 +1644,7 @@ std::wstring FormatMonth(WORD Month)
 			Iterator++;
 		}
 
-		std::wstring MonthDirectory(L"Каталог\\Стандарты\\Время\\Именительный\\Месяцы");
+		std::wstring MonthDirectory(NominativeMonthsDirectoryString);
 
 		MonthDirectory += std::wstring(L"\\") + *Iterator;
 
