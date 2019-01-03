@@ -19,7 +19,6 @@
 #endif // Russian
 
 
-
 const bool MemoryLeaksDebuging = true;
 const bool MemoryLeaksDebugingDone = true;
 
@@ -237,383 +236,407 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 				SelectObject(DeviceContextHandle, BitMapHandle);
 
 				HBRUSH Brush = HBRUSH(GetStockObject(GRAY_BRUSH));
-				
+
 				FillRect(DeviceContextHandle, &ClientRectangle, Brush);
-				
+
 				SetBkMode(DeviceContextHandle, TRANSPARENT);
-				
+
+				HGDIOBJ OldBrush = SelectObject(DeviceContextHandle, Brush);
+
+				SetTextColor(DeviceContextHandle, BLACK_COLOR);
+
+				LOGFONTW LogFontDefault;
+
+				ZeroMemory(&LogFontDefault, DataSize(LogFontDefault));
+
+				LogFontDefault.lfHeight = 16;
+				LogFontDefault.lfCharSet = CHARACTERS_SET;
+
+
+				HFONT FontDefault = CreateFontIndirectW(&LogFontDefault);
+
+				HFONT FontDefaultOld = SelectFont(DeviceContextHandle, FontDefault);
+
+				if (Rectangle(DeviceContextHandle, 0 + 1, ClientRectangle.top + 1 - WindowScrollY, 200 - 1, ClientRectangle.bottom - 1 - WindowScrollY) != TRUE)
 				{
-					HGDIOBJ OldBrush = SelectObject(DeviceContextHandle, Brush);
+					std::wstring Error(ErrorDrawingString);
 
-					SetTextColor(DeviceContextHandle, BLACK_COLOR);
+					Result = 1;
+				}
+				if (Rectangle(DeviceContextHandle, 200 + 1, ClientRectangle.top + 1, 240 - 1, ClientRectangle.bottom - 1) != TRUE)
+				{
+					std::wstring Error(ErrorDrawingString);
 
-					if (Rectangle(DeviceContextHandle, 0 + 1, ClientRectangle.top + 1 - WindowScrollY, 200 - 1, ClientRectangle.bottom - 1 - WindowScrollY) != TRUE)
-					{
-						std::wstring Error(ErrorDrawingString);
+					Result = 1;
+				}
 
-						Result = 1;
-					}
-					if (Rectangle(DeviceContextHandle, 200 + 1, ClientRectangle.top + 1, 240 - 1, ClientRectangle.bottom - 1) != TRUE)
-					{
-						std::wstring Error(ErrorDrawingString);
+				if (MemoryLeaksDebugingDone)
+				{
+					Manager StandardsManager;
 
-						Result = 1;
-					}
+					std::list<std::wstring> CurrentDirectoryStandardsManager = StandardsManager.Select(CurrentDirectory);
 
 					if (MemoryLeaksDebugingDone)
 					{
-						Manager StandardsManager;
-
-						std::list<std::wstring> CurrentDirectoryStandardsManager = StandardsManager.Select(CurrentDirectory);
-
+						CurrentStandardsManager = CurrentDirectoryStandardsManager;
 						if (MemoryLeaksDebugingDone)
 						{
-							CurrentStandardsManager = CurrentDirectoryStandardsManager;
-							if (MemoryLeaksDebugingDone)
+							if (CurrentTable.length() == 0)
 							{
-								if (CurrentTable.length() == 0)
+								for (Automatic Iterator = CurrentDirectoryStandardsManager.begin(); Iterator != CurrentDirectoryStandardsManager.end(); Iterator++)
 								{
-									for (Automatic Iterator = CurrentDirectoryStandardsManager.begin(); Iterator != CurrentDirectoryStandardsManager.end(); Iterator++)
+									if (y + 1 - 30 / 2 - WindowScrollY >= ClientRectangle.top && y - 1 + 30 / 2 - WindowScrollY <= ClientRectangle.bottom)
 									{
-										if (y + 1 - 30 / 2 - WindowScrollY >= ClientRectangle.top && y - 1 + 30 / 2 - WindowScrollY <= ClientRectangle.bottom)
+										if (Rectangle(DeviceContextHandle, 0 + 1, y + 1 - 30 / 2 - WindowScrollY, 200 - 1, y - 1 + 30 / 2 - WindowScrollY) != TRUE)
 										{
-											if (Rectangle(DeviceContextHandle, 0 + 1, y + 1 - 30 / 2 - WindowScrollY, 200 - 1, y - 1 + 30 / 2 - WindowScrollY) != TRUE)
-											{
-												std::wstring Error(ErrorDrawingString);
-
-												Result = 1;
-
-												break;
-											}
-										}
-
-										if (y - WindowScrollY >= ClientRectangle.top && y - WindowScrollY <= ClientRectangle.bottom)
-										{
-											Constant std::wstring Text = *Iterator;
-											Integer TextLength = Integer(Text.length());
-
-											if (TextOutW(DeviceContextHandle, x + 10, y - WindowScrollY, Text.c_str(), TextLength) != TRUE)
-											{
-												std::wstring Error(ErrorDrawingString);
-
-												Result = 1;
-												break;
-											}
-										}
-
-										x += 0;
-										y += 30;
-									}
-
-									SetCurrentDirectoryW(L"..");
-								}
-								else
-								{
-									HANDLE CurrentTableFile = CreateFileW(CurrentTable.c_str(), GENERIC_READ, 0, NULL, OPEN_EXISTING, 0, NULL);
-
-									if (CurrentTableFile != NULL)
-									{
-										DWORD BytesRead = 0;
-										Constant DWORD FileBufferSize = 50000;
-
-										WCHAR FileBuffer[FileBufferSize];
-										ZeroMemory(&FileBuffer, FileBufferSize * DataSize(WCHAR));
-
-										WCHAR FileSignatute = WCHAR();
-										ReadFile(CurrentTableFile, &FileSignatute, DataSize(WCHAR), &BytesRead, NULL);
-
-										if (ReadFile(CurrentTableFile, &FileBuffer, FileBufferSize * DataSize(WCHAR), &BytesRead, NULL) == TRUE)
-										{
-											std::wstring Table;
-
-											std::list<std::wstring> TableLines;
-
-											for (DWORD Item = 0; Item < BytesRead / DataSize(WCHAR); Item++)
-											{
-												WCHAR CurrentSymbol = FileBuffer[Item];
-
-												if (CurrentSymbol != L'\n' && CurrentSymbol != L'\r')
-												{
-													Table += CurrentSymbol;
-												}
-												else
-												{
-													if (Table.length() != 0)
-													{
-														TableLines.push_back(Table);
-													}
-
-													Table = std::wstring();
-												}
-											}
-
-											for (Automatic Iterator = TableLines.begin(); Iterator != TableLines.end(); Iterator++)
-											{
-												if (y + 1 - 30 / 2 - WindowScrollY >= ClientRectangle.top && y - 1 + 30 / 2 - WindowScrollY <= ClientRectangle.bottom)
-												{
-													if (Rectangle(DeviceContextHandle, 0 + 1, y + 1 - 30 / 2 - WindowScrollY, 200 - 1, y - 1 + 30 / 2 - WindowScrollY) != TRUE)
-													{
-														std::wstring Error(ErrorDrawingString);
-
-														Result = 1;
-
-														break;
-													}
-
-												}
-
-												if (y - WindowScrollY >= ClientRectangle.top && y - WindowScrollY <= ClientRectangle.bottom)
-												{
-													Constant std::wstring Text = *Iterator;
-													Integer TextLength = Integer(Text.length());
-													if (TextOutW(DeviceContextHandle, x + 10, y - WindowScrollY, Text.c_str(), TextLength) != TRUE)
-													{
-														std::wstring Error(ErrorDrawingString);
-
-														Result = 1;
-
-														break;
-													}
-												}
-
-												x += 0;
-												y += 30;
-											}
-										}
-										else
-										{
-											std::wstring Error(ErrorReadingFileString);
+											std::wstring Error(ErrorDrawingString);
 
 											Result = 1;
+
+											break;
+										}
+									}
+
+									if (y - WindowScrollY >= ClientRectangle.top && y - WindowScrollY <= ClientRectangle.bottom)
+									{
+										Constant std::wstring Text = *Iterator;
+										Integer TextLength = Integer(Text.length());
+
+										if (TextOutW(DeviceContextHandle, x + 10, y - WindowScrollY, Text.c_str(), TextLength) != TRUE)
+										{
+											std::wstring Error(ErrorDrawingString);
+
+											Result = 1;
+											break;
+										}
+									}
+
+									x += 0;
+									y += 30;
+								}
+							}
+							else
+							{
+								HANDLE CurrentTableFile = CreateFileW(CurrentTable.c_str(), GENERIC_READ, 0, NULL, OPEN_EXISTING, 0, NULL);
+
+								if (CurrentTableFile != NULL)
+								{
+									DWORD BytesRead = 0;
+									Constant DWORD FileBufferSize = 50000;
+
+									WCHAR FileBuffer[FileBufferSize];
+									ZeroMemory(&FileBuffer, FileBufferSize * DataSize(WCHAR));
+
+									WCHAR FileSignatute = WCHAR();
+									ReadFile(CurrentTableFile, &FileSignatute, DataSize(WCHAR), &BytesRead, NULL);
+
+									if (ReadFile(CurrentTableFile, &FileBuffer, FileBufferSize * DataSize(WCHAR), &BytesRead, NULL) == TRUE)
+									{
+										std::wstring Table;
+
+										std::list<std::wstring> TableLines;
+
+										for (DWORD Item = 0; Item < BytesRead / DataSize(WCHAR); Item++)
+										{
+											WCHAR CurrentSymbol = FileBuffer[Item];
+
+											if (CurrentSymbol != L'\n' && CurrentSymbol != L'\r')
+											{
+												Table += CurrentSymbol;
+											}
+											else
+											{
+												if (Table.length() != 0)
+												{
+													TableLines.push_back(Table);
+												}
+
+												Table = std::wstring();
+											}
 										}
 
-										CloseHandle(CurrentTableFile);
+										for (Automatic Iterator = TableLines.begin(); Iterator != TableLines.end(); Iterator++)
+										{
+											if (y + 1 - 30 / 2 - WindowScrollY >= ClientRectangle.top && y - 1 + 30 / 2 - WindowScrollY <= ClientRectangle.bottom)
+											{
+												if (Rectangle(DeviceContextHandle, 0 + 1, y + 1 - 30 / 2 - WindowScrollY, 200 - 1, y - 1 + 30 / 2 - WindowScrollY) != TRUE)
+												{
+													std::wstring Error(ErrorDrawingString);
+
+													Result = 1;
+
+													break;
+												}
+
+											}
+
+											if (y - WindowScrollY >= ClientRectangle.top && y - WindowScrollY <= ClientRectangle.bottom)
+											{
+												Constant std::wstring Text = *Iterator;
+												Integer TextLength = Integer(Text.length());
+												if (TextOutW(DeviceContextHandle, x + 10, y - WindowScrollY, Text.c_str(), TextLength) != TRUE)
+												{
+													std::wstring Error(ErrorDrawingString);
+
+													Result = 1;
+
+													break;
+												}
+											}
+
+											x += 0;
+											y += 30;
+										}
 									}
+									else
+									{
+										std::wstring Error(ErrorReadingFileString);
+
+										Result = 1;
+									}
+
+									CloseHandle(CurrentTableFile);
 								}
 							}
 						}
 					}
+				}
 
 
-					SYSTEMTIME SystemTime;
-					ZeroMemory(&SystemTime, DataSize(SYSTEMTIME));
+				SYSTEMTIME SystemTime;
+				ZeroMemory(&SystemTime, DataSize(SYSTEMTIME));
 
-					GetSystemTime(&SystemTime);
+				GetSystemTime(&SystemTime);
 
-					if (MemoryLeaksDebugingDone)
+				if (MemoryLeaksDebugingDone)
+				{
+					WORD Year = SystemTime.wYear;
+					WORD Month = SystemTime.wMonth;
+					WORD Day = SystemTime.wDay;
+					WORD DayOfWeek = SystemTime.wDayOfWeek;
+					WORD Hour = SystemTime.wHour;
+					WORD Minute = SystemTime.wMinute;
+					WORD Second = SystemTime.wSecond;
+
+					std::wstring ClockCity(LondonTimeString);
+					std::wstring CurrentTime = FormatTime(Year, Month, Day, DayOfWeek, Hour, Minute, Second);
+
+					Integer ClockCityLength = Integer(ClockCity.length());
+
+					if (TextOutW(DeviceContextHandle, 250, 16, ClockCity.c_str(), ClockCityLength) != TRUE)
 					{
-						WORD Year = SystemTime.wYear;
-						WORD Month = SystemTime.wMonth;
-						WORD Day = SystemTime.wDay;
-						WORD DayOfWeek = SystemTime.wDayOfWeek;
-						WORD Hour = SystemTime.wHour;
-						WORD Minute = SystemTime.wMinute;
-						WORD Second = SystemTime.wSecond;
+						std::wstring Error(ErrorDrawingString);
 
-						std::wstring ClockCity(LondonTimeString);
-						std::wstring CurrentTime = FormatTime(Year, Month, Day, DayOfWeek, Hour, Minute, Second);
+						Result = 1;
+					}
 
-						Integer ClockCityLength = Integer(ClockCity.length());
+					Integer CurrentTimeLength = Integer(CurrentTime.length());
 
-						if (TextOutW(DeviceContextHandle, 250, 16, ClockCity.c_str(), ClockCityLength) != TRUE)
-						{
-							std::wstring Error(ErrorDrawingString);
+					if (TextOutW(DeviceContextHandle, 250, 16 + 30, CurrentTime.c_str(), CurrentTimeLength) != TRUE)
+					{
+						std::wstring Error(ErrorDrawingString);
 
-							Result = 1;
-						}
+						Result = 1;
+					}
+				}
 
-						Integer CurrentTimeLength = Integer(CurrentTime.length());
+				if (MemoryLeaksDebugingDone)
+				{
+					SYSTEMTIME LocalTime;
+					ZeroMemory(&LocalTime, DataSize(SYSTEMTIME));
 
-						if (TextOutW(DeviceContextHandle, 250, 16 + 30, CurrentTime.c_str(), CurrentTimeLength) != TRUE)
-						{
-							std::wstring Error(ErrorDrawingString);
+					GetLocalTime(&LocalTime);
 
-							Result = 1;
-						}
+					WORD Year = LocalTime.wYear;
+					WORD Month = LocalTime.wMonth;
+					WORD Day = LocalTime.wDay;
+					WORD DayOfWeek = LocalTime.wDayOfWeek;
+					WORD Hour = LocalTime.wHour;
+					WORD Minute = LocalTime.wMinute;
+					WORD Second = LocalTime.wSecond;
+
+					std::wstring ClockCity(LocalTimeString);
+					std::wstring CurrentTime = FormatTime(Year, Month, Day, DayOfWeek, Hour, Minute, Second);
+
+					Integer ClockCityLength = Integer(ClockCity.length());
+
+					if (TextOutW(DeviceContextHandle, 250, 16 + 30 + 30, ClockCity.c_str(), ClockCityLength) != TRUE)
+					{
+						std::wstring Error(ErrorDrawingString);
+
+						Result = 1;
+					}
+
+					Integer CurrentTimeLength = Integer(CurrentTime.length());
+
+					if (TextOutW(DeviceContextHandle, 250, 16 + 30 + 30 + 30, CurrentTime.c_str(), CurrentTimeLength) != TRUE)
+					{
+						std::wstring Error(ErrorDrawingString);
+
+						Result = 1;
 					}
 
 					if (MemoryLeaksDebugingDone)
 					{
-						SYSTEMTIME LocalTime;
-						ZeroMemory(&LocalTime, DataSize(SYSTEMTIME));
-
-						GetLocalTime(&LocalTime);
-
-						WORD Year = LocalTime.wYear;
-						WORD Month = LocalTime.wMonth;
-						WORD Day = LocalTime.wDay;
-						WORD DayOfWeek = LocalTime.wDayOfWeek;
-						WORD Hour = LocalTime.wHour;
-						WORD Minute = LocalTime.wMinute;
-						WORD Second = LocalTime.wSecond;
-
-						std::wstring ClockCity(LocalTimeString);
-						std::wstring CurrentTime = FormatTime(Year, Month, Day, DayOfWeek, Hour, Minute, Second);
-
-						Integer ClockCityLength = Integer(ClockCity.length());
-
-						if (TextOutW(DeviceContextHandle, 250, 16 + 30 + 30, ClockCity.c_str(), ClockCityLength) != TRUE)
+						if (Rectangle(DeviceContextHandle, 250, 16 + 30 + 30 + 30 + 50, 250 + 210, 16 + 30 + 30 + 30 + 50 + 100) != TRUE)
 						{
 							std::wstring Error(ErrorDrawingString);
 
 							Result = 1;
 						}
 
-						Integer CurrentTimeLength = Integer(CurrentTime.length());
-
-						if (TextOutW(DeviceContextHandle, 250, 16 + 30 + 30 + 30, CurrentTime.c_str(), CurrentTimeLength) != TRUE)
+						if (Rectangle(DeviceContextHandle, 250 + 40, 16 + 30 + 30 + 30 + 50, 250 + 210 - 40, 16 + 30 + 30 + 30 + 50 + 100) != TRUE)
 						{
 							std::wstring Error(ErrorDrawingString);
 
 							Result = 1;
 						}
 
-						if (MemoryLeaksDebugingDone)
+						std::wstring CurrentDayOfWeek = FormatDayOfWeek(CalendarTime.wDayOfWeek);
+
+						Integer CurrentDayOfWeekLength = Integer(CurrentDayOfWeek.length());
+
+						if (TextOutW(DeviceContextHandle, 250 + 40 + 10, 16 + 30 + 30 + 30 + 50 + 16 / 2, CurrentDayOfWeek.c_str(), CurrentDayOfWeekLength) != TRUE)
 						{
-							if (Rectangle(DeviceContextHandle, 250, 16 + 30 + 30 + 30 + 50, 250 + 210, 16 + 30 + 30 + 30 + 50 + 100) != TRUE)
-							{
-								std::wstring Error(ErrorDrawingString);
+							std::wstring Error(ErrorDrawingString);
 
-								Result = 1;
-							}
-
-							if (Rectangle(DeviceContextHandle, 250 + 40, 16 + 30 + 30 + 30 + 50, 250 + 210 - 40, 16 + 30 + 30 + 30 + 50 + 100) != TRUE)
-							{
-								std::wstring Error(ErrorDrawingString);
-
-								Result = 1;
-							}
-
-							std::wstring CurrentDay = FormatDay(CalendarTime.wDay);
-							std::wstring CurrentDayOfWeek = FormatDayOfWeek(CalendarTime.wDayOfWeek);
-
-							Integer CurrentDayOfWeekLength = Integer(CurrentDayOfWeek.length());
-
-							if (TextOutW(DeviceContextHandle, 250 + 40 + 10, 16 + 30 + 30 + 30 + 50 + 16 / 2, CurrentDayOfWeek.c_str(), CurrentDayOfWeekLength) != TRUE)
-							{
-								std::wstring Error(ErrorDrawingString);
-
-								Result = 1;
-							}
+							Result = 1;
+						}
 
 
-							LOGFONTW LogFont;
+						LOGFONTW LogFont;
 
-							ZeroMemory(&LogFont, DataSize(LogFont));
+						ZeroMemory(&LogFont, DataSize(LogFont));
 
-							LogFont.lfHeight = 64;
-
-
-							HFONT Font = CreateFontIndirectW(&LogFont);
-
-							HFONT FontOld = SelectFont(DeviceContextHandle, Font);
-
-							Integer CurrentDayLength = Integer(CurrentDay.length());
-
-							if (TextOutW(DeviceContextHandle, 250 + 40 + 10, 16 + 30 + 30 + 30 + 50 + 16 / 2 + 30, CurrentDay.c_str(), CurrentDayLength) != TRUE)
-							{
-								std::wstring Error(ErrorDrawingString);
-
-								Result = 1;
-							}
-
-							SelectFont(DeviceContextHandle, FontOld);
-
-							WORD BackwardArrow = 0x02C2;
-							std::wstring CurrentBackward;
-							CurrentBackward += WCHAR(BackwardArrow);
-
-							Integer CurrentBackwardLength = Integer(CurrentBackward.length());
-
-							if (TextOutW(DeviceContextHandle, 250 + 10, 16 + 30 + 30 + 30 + 50 + 16 / 2 + 30, CurrentBackward.c_str(), CurrentBackwardLength) != TRUE)
-							{
-								std::wstring Error(ErrorDrawingString);
-
-								Result = 1;
-							}
-
-							WORD ForwardArrow = 0x02C3;
-							std::wstring CurrentForward;
-							CurrentForward += WCHAR(ForwardArrow);
-
-							Integer CurrentForwardLength = Integer(CurrentForward.length());
-
-							if (TextOutW(DeviceContextHandle, 250 + 210 - 40 + 10, 16 + 30 + 30 + 30 + 50 + 16 / 2 + 30, CurrentForward.c_str(), CurrentForwardLength) != TRUE)
-							{
-								std::wstring Error(ErrorDrawingString);
-
-								Result = 1;
-							}
-
-							if (Rectangle(DeviceContextHandle, 250, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 0, 250 + 40 * 7, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 1) != TRUE)
-							{
-								std::wstring Error(ErrorDrawingString);
-
-								Result = 1;
-							}
-							if (Rectangle(DeviceContextHandle, 250, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 1, 250 + 40 * 7, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 2) != TRUE)
-							{
-								std::wstring Error(ErrorDrawingString);
-
-								Result = 1;
-							}
-							if (Rectangle(DeviceContextHandle, 250, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 2, 250 + 40 * 7, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 3) != TRUE)
-							{
-								std::wstring Error(ErrorDrawingString);
-
-								Result = 1;
-							}
-							if (Rectangle(DeviceContextHandle, 250, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 3, 250 + 40 * 7, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 4) != TRUE)
-							{
-								std::wstring Error(ErrorDrawingString);
-
-								Result = 1;
-							}
-							if (Rectangle(DeviceContextHandle, 250, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 4, 250 + 40 * 7, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 5) != TRUE)
-							{
-								std::wstring Error(ErrorDrawingString);
-
-								Result = 1;
-							}
-							if (Rectangle(DeviceContextHandle, 250, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 5, 250 + 40 * 7, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6) != TRUE)
-							{
-								std::wstring Error(ErrorDrawingString);
-
-								Result = 1;
-							}
+						LogFont.lfHeight = 64;
+						LogFont.lfCharSet = CHARACTERS_SET;
 
 
-							std::list<std::list<std::wstring>> CalendarMonthStrings;
+						HFONT Font = CreateFontIndirectW(&LogFont);
 
-							ATL::CTime TimeCalculator(CalendarTime);
+						HFONT FontOld = SelectFont(DeviceContextHandle, Font);
 
-							ATL::CTimeSpan TimeSpanCalculator1(1, 0, 0, 0);
-							ATL::CTimeSpan TimeSpanCalculator2(TimeCalculator.GetDay(), 0, 0, 0);
+						std::wstring CurrentDay = FormatDay(Day);
 
-							TimeCalculator += TimeSpanCalculator1;
-							TimeCalculator -= TimeSpanCalculator2;
+						Integer CurrentDayLength = Integer(CurrentDay.length());
 
-							ATL::CTime TimeCalculatorIterator(TimeCalculator);
-							ATL::CTimeSpan TimeSpanCalculatorDay(1, 0, 0, 0);
+						if (TextOutW(DeviceContextHandle, 250 + 40 + 10, 16 + 30 + 30 + 30 + 50 + 16 / 2 + 30, CurrentDay.c_str(), CurrentDayLength) != TRUE)
+						{
+							std::wstring Error(ErrorDrawingString);
 
-							Automatic CurrentCalculatorDayOfWeek = TimeCalculatorIterator.GetDayOfWeek();
+							Result = 1;
+						}
 
-							std::list<std::wstring> CurrentLineOfCalendarMonthStrings;
+						SelectFont(DeviceContextHandle, FontOld);
+
+						WORD BackwardArrow = 0x02C2;
+						std::wstring CurrentBackward;
+						CurrentBackward += WCHAR(BackwardArrow);
+
+						Integer CurrentBackwardLength = Integer(CurrentBackward.length());
+
+						if (TextOutW(DeviceContextHandle, 250 + 10, 16 + 30 + 30 + 30 + 50 + 16 / 2 + 30, CurrentBackward.c_str(), CurrentBackwardLength) != TRUE)
+						{
+							std::wstring Error(ErrorDrawingString);
+
+							Result = 1;
+						}
+
+						WORD ForwardArrow = 0x02C3;
+						std::wstring CurrentForward;
+						CurrentForward += WCHAR(ForwardArrow);
+
+						Integer CurrentForwardLength = Integer(CurrentForward.length());
+
+						if (TextOutW(DeviceContextHandle, 250 + 210 - 40 + 10, 16 + 30 + 30 + 30 + 50 + 16 / 2 + 30, CurrentForward.c_str(), CurrentForwardLength) != TRUE)
+						{
+							std::wstring Error(ErrorDrawingString);
+
+							Result = 1;
+						}
+
+						if (Rectangle(DeviceContextHandle, 250, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 0, 250 + 40 * 7, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 1) != TRUE)
+						{
+							std::wstring Error(ErrorDrawingString);
+
+							Result = 1;
+						}
+						if (Rectangle(DeviceContextHandle, 250, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 1, 250 + 40 * 7, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 2) != TRUE)
+						{
+							std::wstring Error(ErrorDrawingString);
+
+							Result = 1;
+						}
+						if (Rectangle(DeviceContextHandle, 250, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 2, 250 + 40 * 7, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 3) != TRUE)
+						{
+							std::wstring Error(ErrorDrawingString);
+
+							Result = 1;
+						}
+						if (Rectangle(DeviceContextHandle, 250, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 3, 250 + 40 * 7, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 4) != TRUE)
+						{
+							std::wstring Error(ErrorDrawingString);
+
+							Result = 1;
+						}
+						if (Rectangle(DeviceContextHandle, 250, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 4, 250 + 40 * 7, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 5) != TRUE)
+						{
+							std::wstring Error(ErrorDrawingString);
+
+							Result = 1;
+						}
+						if (Rectangle(DeviceContextHandle, 250, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 5, 250 + 40 * 7, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6) != TRUE)
+						{
+							std::wstring Error(ErrorDrawingString);
+
+							Result = 1;
+						}
 
 
-							Automatic CurrentDayOfWeekIterator = 2;
+						std::list<std::list<std::wstring>> CalendarMonthStrings;
 
-							if (CurrentCalculatorDayOfWeek == 1)
-							{
-								CurrentCalculatorDayOfWeek = 8;
-							}
+						ATL::CTime TimeCalculator(CalendarTime);
 
-							for (; CurrentDayOfWeekIterator < CurrentCalculatorDayOfWeek; CurrentDayOfWeekIterator++)
-							{
-								CurrentLineOfCalendarMonthStrings.push_back(std::wstring(L" "));
-							}
+						ATL::CTimeSpan TimeSpanCalculator1(1, 0, 0, 0);
+						ATL::CTimeSpan TimeSpanCalculator2(TimeCalculator.GetDay(), 0, 0, 0);
 
-							for (; CurrentDayOfWeekIterator <= 8; CurrentDayOfWeekIterator++)
+						TimeCalculator += TimeSpanCalculator1;
+						TimeCalculator -= TimeSpanCalculator2;
+
+						ATL::CTime TimeCalculatorIterator(TimeCalculator);
+						ATL::CTimeSpan TimeSpanCalculatorDay(1, 0, 0, 0);
+
+						Automatic CurrentCalculatorDayOfWeek = TimeCalculatorIterator.GetDayOfWeek();
+
+						std::list<std::wstring> CurrentLineOfCalendarMonthStrings;
+
+
+						Automatic CurrentDayOfWeekIterator = 2;
+
+						if (CurrentCalculatorDayOfWeek == 1)
+						{
+							CurrentCalculatorDayOfWeek = 8;
+						}
+
+						for (; CurrentDayOfWeekIterator < CurrentCalculatorDayOfWeek; CurrentDayOfWeekIterator++)
+						{
+							CurrentLineOfCalendarMonthStrings.push_back(std::wstring(L" "));
+						}
+
+						for (; CurrentDayOfWeekIterator <= 8; CurrentDayOfWeekIterator++)
+						{
+							std::wstring CurrentDayString = FormatDay(TimeCalculatorIterator.GetDay());
+							CurrentLineOfCalendarMonthStrings.push_back(CurrentDayString);
+							TimeCalculatorIterator += TimeSpanCalculatorDay;
+						}
+
+						CalendarMonthStrings.push_back(CurrentLineOfCalendarMonthStrings);
+
+						CurrentLineOfCalendarMonthStrings.clear();
+
+						for (; TimeCalculatorIterator.GetMonth() == TimeCalculator.GetMonth(); )
+						{
+							for (CurrentDayOfWeekIterator = 2; CurrentDayOfWeekIterator <= 8 && TimeCalculatorIterator.GetMonth() == TimeCalculator.GetMonth(); CurrentDayOfWeekIterator++)
 							{
 								std::wstring CurrentDayString = FormatDay(TimeCalculatorIterator.GetDay());
 								CurrentLineOfCalendarMonthStrings.push_back(CurrentDayString);
@@ -623,177 +646,170 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 							CalendarMonthStrings.push_back(CurrentLineOfCalendarMonthStrings);
 
 							CurrentLineOfCalendarMonthStrings.clear();
-
-							for (; TimeCalculatorIterator.GetMonth() == TimeCalculator.GetMonth(); )
-							{
-								for (CurrentDayOfWeekIterator = 2; CurrentDayOfWeekIterator <= 8 && TimeCalculatorIterator.GetMonth() == TimeCalculator.GetMonth(); CurrentDayOfWeekIterator++)
-								{
-									std::wstring CurrentDayString = FormatDay(TimeCalculatorIterator.GetDay());
-									CurrentLineOfCalendarMonthStrings.push_back(CurrentDayString);
-									TimeCalculatorIterator += TimeSpanCalculatorDay;
-								}
-
-								CalendarMonthStrings.push_back(CurrentLineOfCalendarMonthStrings);
-
-								CurrentLineOfCalendarMonthStrings.clear();
-							}
-
-							Automatic Y = 0;
-							for (Automatic IteratorY = CalendarMonthStrings.begin(); IteratorY != CalendarMonthStrings.end(); IteratorY++)
-							{
-								Automatic X = 0;
-								for (Automatic IteratorX = IteratorY->begin(); IteratorX != IteratorY->end(); IteratorX++)
-								{
-									std::wstring CurrentMonthCalendarDay = *IteratorX;
-									Integer CurrentMonthCalendarDayLength = Integer(CurrentMonthCalendarDay.length());
-
-
-									if (TextOutW(DeviceContextHandle, 250 + 40 * X, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * Y, CurrentMonthCalendarDay.c_str(), CurrentMonthCalendarDayLength) != TRUE)
-									{
-										std::wstring Error(ErrorDrawingString);
-
-										Result = 1;
-
-										break;
-									}
-
-									X++;
-								}
-
-								Y++;
-							}
-
-
-							std::wstring CurrentMonth = FormatMonth(CalendarTime.wMonth);
-							Integer CurrentMonthLength = Integer(CurrentMonth.length());
-
-							FontOld = SelectFont(DeviceContextHandle, Font);
-
-							if (TextOutW(DeviceContextHandle, 250, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20, CurrentMonth.c_str(), CurrentMonthLength) != TRUE)
-							{
-								std::wstring Error(ErrorDrawingString);
-
-								Result = 1;
-							}
-
-							std::wstring CurrentYear = FormatYear(CalendarTime.wYear);
-							Integer CurrentYearLength = Integer(CurrentYear.length());
-
-							if (TextOutW(DeviceContextHandle, 250, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20, CurrentYear.c_str(), CurrentYearLength) != TRUE)
-							{
-								std::wstring Error(ErrorDrawingString);
-
-								Result = 1;
-							}
-
-							SelectFont(DeviceContextHandle, FontOld);
-
-							if (Rectangle(DeviceContextHandle, 250 + 40 * 7, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20, 250 + 40 * 7 + 40, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 30) != TRUE)
-							{
-								std::wstring Error(ErrorDrawingString);
-
-								Result = 1;
-							}
-							if (Rectangle(DeviceContextHandle, 250 + 40 * 7, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 30 + 5, 250 + 40 * 7 + 40, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 30 + 5 + 30) != TRUE)
-							{
-								std::wstring Error(ErrorDrawingString);
-
-								Result = 1;
-							}
-
-							WORD UpArrow = 0x02C4;
-							std::wstring CurrentUp;
-							CurrentUp += WCHAR(UpArrow);
-							Integer CurrentUpLength = Integer(CurrentUp.length());
-							if (TextOutW(DeviceContextHandle, 250 + 40 * 7 + 10, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 10, CurrentUp.c_str(), CurrentUpLength) != TRUE)
-							{
-								std::wstring Error(ErrorDrawingString);
-
-								Result = 1;
-							}
-
-							WORD DownArrow = 0x02C5;
-							std::wstring CurrentDown;
-							CurrentDown += WCHAR(DownArrow);
-							Integer CurrentDownLength = Integer(CurrentDown.length());
-							if (TextOutW(DeviceContextHandle, 250 + 40 * 7 + 10, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 30 + 10, CurrentDown.c_str(), CurrentDownLength) != TRUE)
-							{
-								std::wstring Error(ErrorDrawingString);
-
-								Result = 1;
-							}
-
-							if (DeleteObject(Font) != TRUE)
-							{
-								std::wstring Error(ErrorDeletingFontString);
-
-								Result = 1;
-							}
 						}
 
-						if (MemoryLeaksDebugingDone)
+						Automatic Y = 0;
+						for (Automatic IteratorY = CalendarMonthStrings.begin(); IteratorY != CalendarMonthStrings.end(); IteratorY++)
 						{
-							Constant Integer NumberBufferLength = 50000;
-							WCHAR NumberBuffer[NumberBufferLength];
-
-							ZeroMemory(NumberBuffer, NumberBufferLength * DataSize(WCHAR));
-
-							_itow_s(RenderFrequency, NumberBuffer, NumberBufferLength, 10);
-
-							std::wstring NumberRenderFrequency(NumberBuffer);
-
-							for (Automatic iterator = NumberRenderFrequency.length(); iterator < 4; iterator++)
+							Automatic X = 0;
+							for (Automatic IteratorX = IteratorY->begin(); IteratorX != IteratorY->end(); IteratorX++)
 							{
-								NumberRenderFrequency = std::wstring(L"0") + NumberRenderFrequency;
+								std::wstring CurrentMonthCalendarDay = *IteratorX;
+								Integer CurrentMonthCalendarDayLength = Integer(CurrentMonthCalendarDay.length());
+
+
+								if (TextOutW(DeviceContextHandle, 250 + 40 * X, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * Y, CurrentMonthCalendarDay.c_str(), CurrentMonthCalendarDayLength) != TRUE)
+								{
+									std::wstring Error(ErrorDrawingString);
+
+									Result = 1;
+
+									break;
+								}
+
+								X++;
 							}
 
-							ZeroMemory(NumberBuffer, NumberBufferLength * DataSize(WCHAR));
+							Y++;
+						}
 
-							_itow_s(FramesPerSecond, NumberBuffer, NumberBufferLength, 10);
 
-							std::wstring NumberRenderCurrentFrameNumber(NumberBuffer);
+						std::wstring CurrentMonth = FormatMonth(CalendarTime.wMonth);
+						Integer CurrentMonthLength = Integer(CurrentMonth.length());
 
-							for (Automatic iterator = NumberRenderCurrentFrameNumber.length(); iterator < 4; iterator++)
-							{
-								NumberRenderCurrentFrameNumber = std::wstring(L"0") + NumberRenderCurrentFrameNumber;
-							}
-							
-							std::wstring CurrentNumber;
-							CurrentNumber = std::wstring(FrameRateString) + NumberRenderFrequency + std::wstring(CurrentFrameString) + NumberRenderCurrentFrameNumber + std::wstring(PointString);
+						FontOld = SelectFont(DeviceContextHandle, Font);
 
-							Integer CurrentNumberLength = Integer(CurrentNumber.length());
+						if (TextOutW(DeviceContextHandle, 250, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20, CurrentMonth.c_str(), CurrentMonthLength) != TRUE)
+						{
+							std::wstring Error(ErrorDrawingString);
 
-							RECTANGLE ClientRectangle;
-							ZeroMemory(&ClientRectangle, DataSize(RECTANGLE));
+							Result = 1;
+						}
 
-							GetClientRect(WindowHandle, &ClientRectangle);
+						std::wstring CurrentYear = FormatYear(CalendarTime.wYear);
+						Integer CurrentYearLength = Integer(CurrentYear.length());
 
-							SetBkMode(DeviceContextHandle, TRANSPARENT);
+						if (TextOutW(DeviceContextHandle, 250, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20, CurrentYear.c_str(), CurrentYearLength) != TRUE)
+						{
+							std::wstring Error(ErrorDrawingString);
 
-							if (TextOutW(DeviceContextHandle, ClientRectangle.right - CurrentNumberLength * 10, ClientRectangle.bottom - 30, CurrentNumber.c_str(), CurrentNumberLength) != TRUE)
-							{
-								std::wstring Error(ErrorDrawingString);
+							Result = 1;
+						}
 
-								Result = 1;
-							}
+						SelectFont(DeviceContextHandle, FontOld);
+
+						if (Rectangle(DeviceContextHandle, 250 + 40 * 7, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20, 250 + 40 * 7 + 40, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 30) != TRUE)
+						{
+							std::wstring Error(ErrorDrawingString);
+
+							Result = 1;
+						}
+						if (Rectangle(DeviceContextHandle, 250 + 40 * 7, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 30 + 5, 250 + 40 * 7 + 40, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 30 + 5 + 30) != TRUE)
+						{
+							std::wstring Error(ErrorDrawingString);
+
+							Result = 1;
+						}
+
+						WORD UpArrow = 0x02C4;
+						std::wstring CurrentUp;
+						CurrentUp += WCHAR(UpArrow);
+						Integer CurrentUpLength = Integer(CurrentUp.length());
+						if (TextOutW(DeviceContextHandle, 250 + 40 * 7 + 10, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 10, CurrentUp.c_str(), CurrentUpLength) != TRUE)
+						{
+							std::wstring Error(ErrorDrawingString);
+
+							Result = 1;
+						}
+
+						WORD DownArrow = 0x02C5;
+						std::wstring CurrentDown;
+						CurrentDown += WCHAR(DownArrow);
+						Integer CurrentDownLength = Integer(CurrentDown.length());
+						if (TextOutW(DeviceContextHandle, 250 + 40 * 7 + 10, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 30 + 10, CurrentDown.c_str(), CurrentDownLength) != TRUE)
+						{
+							std::wstring Error(ErrorDrawingString);
+
+							Result = 1;
+						}
+
+						if (DeleteObject(Font) != TRUE)
+						{
+							std::wstring Error(ErrorDeletingFontString);
+
+							Result = 1;
+						}
+
+						FontDefaultOld = SelectFont(DeviceContextHandle, FontDefault);
+
+						if (DeleteObject(FontDefault) != TRUE)
+						{
+							std::wstring Error(ErrorDeletingFontString);
+
+							Result = 1;
 						}
 					}
 
-					SelectObject(DeviceContextHandle, OldBrush);
-
-
-					if (DeleteObject(Brush) != TRUE)
+					if (MemoryLeaksDebugingDone)
 					{
-						std::wstring Error(ErrorDeletingBrushString);
+						Constant Integer NumberBufferLength = 50000;
+						WCHAR NumberBuffer[NumberBufferLength];
 
-						Result = 1;
+						ZeroMemory(NumberBuffer, NumberBufferLength * DataSize(WCHAR));
+
+						_itow_s(RenderFrequency, NumberBuffer, NumberBufferLength, 10);
+
+						std::wstring NumberRenderFrequency(NumberBuffer);
+
+						for (Automatic iterator = NumberRenderFrequency.length(); iterator < 4; iterator++)
+						{
+							NumberRenderFrequency = std::wstring(L"0") + NumberRenderFrequency;
+						}
+
+						ZeroMemory(NumberBuffer, NumberBufferLength * DataSize(WCHAR));
+
+						_itow_s(FramesPerSecond, NumberBuffer, NumberBufferLength, 10);
+
+						std::wstring NumberRenderCurrentFrameNumber(NumberBuffer);
+
+						for (Automatic iterator = NumberRenderCurrentFrameNumber.length(); iterator < 4; iterator++)
+						{
+							NumberRenderCurrentFrameNumber = std::wstring(L"0") + NumberRenderCurrentFrameNumber;
+						}
+
+						std::wstring CurrentNumber;
+						CurrentNumber = std::wstring(FrameRateString) + NumberRenderFrequency + std::wstring(CurrentFrameString) + NumberRenderCurrentFrameNumber + std::wstring(PointString);
+
+						Integer CurrentNumberLength = Integer(CurrentNumber.length());
+
+						RECTANGLE ClientRectangle;
+						ZeroMemory(&ClientRectangle, DataSize(RECTANGLE));
+
+						GetClientRect(WindowHandle, &ClientRectangle);
+
+						SetBkMode(DeviceContextHandle, TRANSPARENT);
+
+						if (TextOutW(DeviceContextHandle, ClientRectangle.right - CurrentNumberLength * 10, ClientRectangle.bottom - 30, CurrentNumber.c_str(), CurrentNumberLength) != TRUE)
+						{
+							std::wstring Error(ErrorDrawingString);
+
+							Result = 1;
+						}
 					}
 				}
-				
+
+				SelectObject(DeviceContextHandle, OldBrush);
 
 				if (BitBlt(DeviceContextHandleWindow, ClientRectangle.left, ClientRectangle.top, ClientRectangle.right, ClientRectangle.bottom, DeviceContextHandle, 0, 0, SRCCOPY) != TRUE)
 				{
 					std::wstring Error(ErrorCopyingContextString);
+
+					Result = 1;
+				}
+
+				if (DeleteObject(Brush) != TRUE)
+				{
+					std::wstring Error(ErrorDeletingBrushString);
 
 					Result = 1;
 				}
@@ -839,7 +855,7 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 	ApplicationDrawingRefreshTime += ApplicationDrawingRefreshTimeEnd - ApplicationDrawingRefreshTimeStart;
 
 	Rendering = false;
-	
+
 
 	return Result;
 }
@@ -1246,6 +1262,16 @@ std::wstring FormatTimeLunarStyle(WORD Year, WORD Month, WORD Day, WORD DayOfWee
 
 std::wstring FormatTime(WORD Year, WORD Month, WORD Day, WORD DayOfWeek, WORD Hour, WORD Minute, WORD Second)
 {
+
+	{
+		Constant DWORD CurrentDatabaseLength = 10000;
+		wchar_t CurrentDatabase[CurrentDatabaseLength];
+		if (GetCurrentDirectoryW(CurrentDatabaseLength, CurrentDatabase) != 0)
+		{
+			std::wstring CurrentDirectory(CurrentDatabase);
+		}
+	}
+
 	std::wstring Result;
 
 	Constant Integer CurrentDirectoryBufferLength = 50000;
@@ -1503,6 +1529,16 @@ std::wstring FormatTime(WORD Year, WORD Month, WORD Day, WORD DayOfWeek, WORD Ho
 
 std::wstring FormatDay(WORD Day)
 {
+
+	{
+		Constant DWORD CurrentDatabaseLength = 10000;
+		wchar_t CurrentDatabase[CurrentDatabaseLength];
+		if (GetCurrentDirectoryW(CurrentDatabaseLength, CurrentDatabase) != 0)
+		{
+			std::wstring CurrentDirectory(CurrentDatabase);
+		}
+	}
+
 	std::wstring Result;
 
 	{
@@ -1529,6 +1565,16 @@ std::wstring FormatDay(WORD Day)
 
 std::wstring FormatDayOfWeek(WORD DayOfWeek)
 {
+
+	{
+		Constant DWORD CurrentDatabaseLength = 10000;
+		wchar_t CurrentDatabase[CurrentDatabaseLength];
+		if (GetCurrentDirectoryW(CurrentDatabaseLength, CurrentDatabase) != 0)
+		{
+			std::wstring CurrentDirectory(CurrentDatabase);
+		}
+	}
+
 	std::wstring Result;
 
 	Constant Integer CurrentDirectoryBufferLength = 50000;
@@ -1615,6 +1661,16 @@ std::wstring FormatDayOfWeek(WORD DayOfWeek)
 
 std::wstring FormatMonth(WORD Month)
 {
+
+	{
+		Constant DWORD CurrentDatabaseLength = 10000;
+		wchar_t CurrentDatabase[CurrentDatabaseLength];
+		if (GetCurrentDirectoryW(CurrentDatabaseLength, CurrentDatabase) != 0)
+		{
+			std::wstring CurrentDirectory(CurrentDatabase);
+		}
+	}
+
 	std::wstring Result;
 
 	Constant Integer CurrentDirectoryBufferLength = 50000;
@@ -1692,6 +1748,16 @@ std::wstring FormatMonth(WORD Month)
 
 std::wstring FormatYear(WORD Year)
 {
+
+	{
+		Constant DWORD CurrentDatabaseLength = 10000;
+		wchar_t CurrentDatabase[CurrentDatabaseLength];
+		if (GetCurrentDirectoryW(CurrentDatabaseLength, CurrentDatabase) != 0)
+		{
+			std::wstring CurrentDirectory(CurrentDatabase);
+		}
+	}
+
 	Constant Integer YearNumberBufferLength = 50000;
 	WCHAR YearNumberBuffer[YearNumberBufferLength];
 
