@@ -51,3 +51,25 @@ const std::wstring GenitiveYearDirectoryString = CatalogBaseString + std::wstrin
 const std::wstring GenitiveMonthsDirectoryString = CatalogBaseString + std::wstring(L"\\Standards\\Time\\Months");
 const std::wstring GenitiveMonthDirectoryString = CatalogBaseString + std::wstring(L"\\Standards\\Time\\Month");
 const std::wstring GenitiveDayDirectoryString = CatalogBaseString + std::wstring(L"\\Standards\\Time\\Day");
+
+const BYTE CHARACTERS_SET = ANSI_CHARSET;
+
+/*/
+Manage font: set 'BYTE CHARACTERS_SET' one of
+
+ANSI_CHARSET
+BALTIC_CHARSET
+CHINESEBIG5_CHARSET
+DEFAULT_CHARSET
+EASTEUROPE_CHARSET
+GB2312_CHARSET
+GREEK_CHARSET
+HANGUL_CHARSET
+MAC_CHARSET
+OEM_CHARSET
+RUSSIAN_CHARSET
+SHIFTJIS_CHARSET
+SYMBOL_CHARSET
+TURKISH_CHARSET
+VIETNAMESE_CHARSET
+/*/

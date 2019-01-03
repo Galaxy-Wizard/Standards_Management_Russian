@@ -16,29 +16,38 @@ Manager::~Manager()
 
 std::list<std::wstring> Manager::Select(Constant std::wstring Database)
 {
-	if (SetCurrentDirectoryW(Database.c_str()) == TRUE)
+	Constant DWORD CurrentDatabaseLength = 10000;
+	wchar_t CurrentDatabase[CurrentDatabaseLength];
+	if (GetCurrentDirectoryW(CurrentDatabaseLength, CurrentDatabase) != 0)
 	{
-		std::list<std::wstring> Tables;
-
-		WIN32_FIND_DATAW FindData;
-
-		ZeroMemory(&FindData, DataSize(WIN32_FIND_DATAW));
-
-		HANDLE FindFileHandle = FindFirstFileW(L"*.*", &FindData);
-
-		if (FindFileHandle != NULL)
+		if (SetCurrentDirectoryW(Database.c_str()) == TRUE)
 		{
-			Tables.push_back(FindData.cFileName);
+			std::list<std::wstring> Tables;
 
-			for (; FindNextFileW(FindFileHandle, &FindData) != FALSE;)
+			WIN32_FIND_DATAW FindData;
+
+			ZeroMemory(&FindData, DataSize(WIN32_FIND_DATAW));
+
+			HANDLE FindFileHandle = FindFirstFileW(L"*.*", &FindData);
+
+			if (FindFileHandle != NULL)
 			{
 				Tables.push_back(FindData.cFileName);
+
+				for (; FindNextFileW(FindFileHandle, &FindData) != FALSE;)
+				{
+					Tables.push_back(FindData.cFileName);
+				}
+
+				FindClose(FindFileHandle);
 			}
 
-			FindClose(FindFileHandle);
+			SetCurrentDirectoryW(CurrentDatabase);
+
+			return Tables;
 		}
 
-		return Tables;
+		SetCurrentDirectoryW(CurrentDatabase);
 	}
 
 	return std::list<std::wstring>();
