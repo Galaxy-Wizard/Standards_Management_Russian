@@ -19,8 +19,8 @@
 #endif // Russian
 
 
-const bool MemoryLeaksDebuging = true;
-const bool MemoryLeaksDebugingDone = true;
+Constant bool MemoryLeaksDebuging = true;
+Constant bool MemoryLeaksDebugingDone = true;
 
 LRESULT CALLBACK MessagesHandler(HWND, UINT, WPARAM, LPARAM);
 
@@ -321,6 +321,7 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 
 								if (CurrentTableFile != NULL)
 								{
+									/*/
 									DWORD BytesRead = 0;
 									Constant DWORD FileBufferSize = 50000;
 
@@ -394,8 +395,12 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 
 										Result = 1;
 									}
-
+									/*/
 									CloseHandle(CurrentTableFile);
+
+									ShellExecuteW(WindowHandle, std::wstring(L"Open").c_str(), CurrentTable.c_str(), NULL, CurrentDirectory.c_str(), SW_SHOW);
+
+									CurrentTable = std::wstring();
 								}
 							}
 						}
