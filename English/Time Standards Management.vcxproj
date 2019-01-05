@@ -23,7 +23,7 @@
     <ClInclude Include="Localization.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\main.cpp" />
+    <ClCompile Include="..\Main.cpp" />
     <ClCompile Include="..\Manager.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
