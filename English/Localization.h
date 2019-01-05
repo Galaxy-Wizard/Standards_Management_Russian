@@ -1,58 +1,60 @@
 #pragma once
 
-const std::wstring WindowCaptionString(L"Standards management");
+#include "Manager.h"
 
-const std::wstring ErrorDrawingString(L"Failure when trying to draw.");
-const std::wstring ErrorReadingFileString(L"Failure when trying to read a file.");
-const std::wstring ErrorDeletingFontString(L"Failure when trying to delete a font.");
-const std::wstring ErrorDeletingBrushString(L"Failure when trying to remove a brush.");
-const std::wstring ErrorCopyingContextString(L"Failure when trying to copy a drawing context from memory.");
-const std::wstring ErrorDeletingBitMapString(L"Failure when trying to delete a canvas.");
-const std::wstring ErrorDeletingMemoryContextString(L"Failure when trying to delete a drawing context in memory.");
-const std::wstring ErrorCreatingMemoryContextString(L"Failure when trying to get a drawing context in memory.");
-const std::wstring ErrorDeletingContextString(L"Failure when attempting to delete drawing context.");
-const std::wstring ErrorCreatingContextString(L"Failure when trying to get drawing context.");
+Constant std::wstring WindowCaptionString(L"Standards management");
 
-const std::wstring LondonTimeString(L"London time:");
-const std::wstring LocalTimeString(L"Local time время:");
-const std::wstring FrameRateString(L"Frame rate ");
-const std::wstring CurrentFrameString(L", current frame ");
-const std::wstring PointString(L".");
+Constant std::wstring ErrorDrawingString(L"Failure when trying to draw.");
+Constant std::wstring ErrorReadingFileString(L"Failure when trying to read a file.");
+Constant std::wstring ErrorDeletingFontString(L"Failure when trying to delete a font.");
+Constant std::wstring ErrorDeletingBrushString(L"Failure when trying to remove a brush.");
+Constant std::wstring ErrorCopyingContextString(L"Failure when trying to copy a drawing context from memory.");
+Constant std::wstring ErrorDeletingBitMapString(L"Failure when trying to delete a canvas.");
+Constant std::wstring ErrorDeletingMemoryContextString(L"Failure when trying to delete a drawing context in memory.");
+Constant std::wstring ErrorCreatingMemoryContextString(L"Failure when trying to get a drawing context in memory.");
+Constant std::wstring ErrorDeletingContextString(L"Failure when attempting to delete drawing context.");
+Constant std::wstring ErrorCreatingContextString(L"Failure when trying to get drawing context.");
 
-const std::wstring CatalogString(L"Catalog");
-const std::wstring CatalogBaseString = CatalogString + std::wstring(L"\\");
+Constant std::wstring LondonTimeString(L"London time:");
+Constant std::wstring LocalTimeString(L"Local time время:");
+Constant std::wstring FrameRateString(L"Frame rate ");
+Constant std::wstring CurrentFrameString(L", current frame ");
+Constant std::wstring PointString(L".");
 
-const std::wstring DayOfWeekListMondayString(L"Monday");
-const std::wstring DayOfWeekListTuesdayString(L"Tuesday");
-const std::wstring DayOfWeekListWednesdayString(L"Wednesday");
-const std::wstring DayOfWeekListThursdayString(L"Thursday");
-const std::wstring DayOfWeekListFridayString(L"Friday");
-const std::wstring DayOfWeekListSaturdayString(L"Saturday");
-const std::wstring DayOfWeekListSundayString(L"Sunday");
+Constant std::wstring CatalogString(L"Catalog");
+Constant std::wstring CatalogBaseString = CatalogString + std::wstring(L"\\");
 
-const std::wstring MonthListJanuaryString(L"January");
-const std::wstring MonthListFebruaryString(L"February");
-const std::wstring MonthListMarchString(L"March");
-const std::wstring MonthListAprilString(L"May");
-const std::wstring MonthListMayString(L"May");
-const std::wstring MonthListJuneString(L"June");
-const std::wstring MonthListJulyString(L"July");
-const std::wstring MonthListAugustString(L"August");
-const std::wstring MonthListSeptemberString(L"September");
-const std::wstring MonthListOctoberString(L"October");
-const std::wstring MonthListNovemberString(L"November");
-const std::wstring MonthListDecemberString(L"December");
+Constant std::wstring DayOfWeekListMondayString(L"Monday");
+Constant std::wstring DayOfWeekListTuesdayString(L"Tuesday");
+Constant std::wstring DayOfWeekListWednesdayString(L"Wednesday");
+Constant std::wstring DayOfWeekListThursdayString(L"Thursday");
+Constant std::wstring DayOfWeekListFridayString(L"Friday");
+Constant std::wstring DayOfWeekListSaturdayString(L"Saturday");
+Constant std::wstring DayOfWeekListSundayString(L"Sunday");
 
-const std::wstring NominativeDayOfWeekDirectoryString = CatalogBaseString + std::wstring(L"\\Standards\\Time\\Day of Week");
-const std::wstring NominativeMonthsDirectoryString = CatalogBaseString + std::wstring(L"\\Standards\\Time\\Months");
-const std::wstring NominativeMonthDirectoryString = CatalogBaseString + std::wstring(L"\\Standards\\Time\\Month");
+Constant std::wstring MonthListJanuaryString(L"January");
+Constant std::wstring MonthListFebruaryString(L"February");
+Constant std::wstring MonthListMarchString(L"March");
+Constant std::wstring MonthListAprilString(L"May");
+Constant std::wstring MonthListMayString(L"May");
+Constant std::wstring MonthListJuneString(L"June");
+Constant std::wstring MonthListJulyString(L"July");
+Constant std::wstring MonthListAugustString(L"August");
+Constant std::wstring MonthListSeptemberString(L"September");
+Constant std::wstring MonthListOctoberString(L"October");
+Constant std::wstring MonthListNovemberString(L"November");
+Constant std::wstring MonthListDecemberString(L"December");
 
-const std::wstring GenitiveYearDirectoryString = CatalogBaseString + std::wstring(L"\\Standards\\Time\\Year");
-const std::wstring GenitiveMonthsDirectoryString = CatalogBaseString + std::wstring(L"\\Standards\\Time\\Months");
-const std::wstring GenitiveMonthDirectoryString = CatalogBaseString + std::wstring(L"\\Standards\\Time\\Month");
-const std::wstring GenitiveDayDirectoryString = CatalogBaseString + std::wstring(L"\\Standards\\Time\\Day");
+Constant std::wstring NominativeDayOfWeekDirectoryString = CatalogBaseString + std::wstring(L"\\Standards\\Time\\Day of Week");
+Constant std::wstring NominativeMonthsDirectoryString = CatalogBaseString + std::wstring(L"\\Standards\\Time\\Months");
+Constant std::wstring NominativeMonthDirectoryString = CatalogBaseString + std::wstring(L"\\Standards\\Time\\Month");
 
-const BYTE CHARACTERS_SET = ANSI_CHARSET;
+Constant std::wstring GenitiveYearDirectoryString = CatalogBaseString + std::wstring(L"\\Standards\\Time\\Year");
+Constant std::wstring GenitiveMonthsDirectoryString = CatalogBaseString + std::wstring(L"\\Standards\\Time\\Months");
+Constant std::wstring GenitiveMonthDirectoryString = CatalogBaseString + std::wstring(L"\\Standards\\Time\\Month");
+Constant std::wstring GenitiveDayDirectoryString = CatalogBaseString + std::wstring(L"\\Standards\\Time\\Day");
+
+Constant BYTE CHARACTERS_SET = ANSI_CHARSET;
 
 /*/
 Manage font: set 'BYTE CHARACTERS_SET' one of
