@@ -251,6 +251,7 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 
 				LogFontDefault.lfHeight = 16;
 				LogFontDefault.lfCharSet = CHARACTERS_SET;
+				//wcscpy_s(LogFontDefault.lfFaceName, L"Times New Roman");
 
 
 				HFONT FontDefault = CreateFontIndirectW(&LogFontDefault);
@@ -515,13 +516,14 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 
 						LogFont.lfHeight = 64;
 						LogFont.lfCharSet = CHARACTERS_SET;
+						//wcscpy_s(LogFont.lfFaceName, L"Times New Roman");
 
 
 						HFONT Font = CreateFontIndirectW(&LogFont);
 
 						HFONT FontOld = SelectFont(DeviceContextHandle, Font);
 
-						std::wstring CurrentDay = FormatDay(Day);
+						std::wstring CurrentDay = FormatDay(CalendarTime.wDay);
 
 						Integer CurrentDayLength = Integer(CurrentDay.length());
 
