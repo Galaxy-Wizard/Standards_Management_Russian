@@ -73,8 +73,8 @@ Integer WINAPI WinMain(HINSTANCE Instance, HINSTANCE, LPSTR, Integer)
 	RegisterClassExW(&WindowClass);
 
 	HWND WindowHandle = CreateWindowW(L"WindowClass", WindowCaptionString.c_str(),
-		WS_OVERLAPPEDWINDOW | WS_POPUP,
-		0, 0, 700, 900, GetDesktopWindow(), NULL, WindowClass.hInstance, NULL);
+		WS_OVERLAPPEDWINDOW | WS_VISIBLE,
+		0, 0, 700, 900, NULL/*/GetDesktopWindow()/*/, NULL, WindowClass.hInstance, NULL);
 
 	Automatic CURSOR_ARROW = MAKEINTRESOURCEW(32512);
 
@@ -98,11 +98,11 @@ Integer WINAPI WinMain(HINSTANCE Instance, HINSTANCE, LPSTR, Integer)
 
 	DWORD TicksPast = 0;
 
-	PeekMessage(&Message, NULL, 0, 0, PM_NOREMOVE);
+	PeekMessageW(&Message, NULL, 0, 0, PM_NOREMOVE);
 
 	for (; Message.message != WM_QUIT && Message.message != WM_CLOSE;)
 	{
-		if (PeekMessage(&Message, NULL, 0, 0, PM_REMOVE))
+		if (PeekMessageW(&Message, NULL, 0, 0, PM_REMOVE))
 		{
 			TranslateMessage(&Message);
 			DispatchMessageW(&Message);
@@ -143,53 +143,62 @@ LRESULT CALLBACK MessagesHandler(HWND p1, UINT p2, WPARAM p3, LPARAM p4)
 {
 	LRESULT Result = 1;
 
-	if (p2 == WM_ERASEBKGND)
+	if (p2 == WM_DESTROY)
 	{
-		x = 22;
-		y = 16;
+		PostQuitMessage(0);
 
 		Result = 0;
 	}
 	else
 	{
-		if (p2 == WM_PAINT)
+		if (p2 == WM_ERASEBKGND)
 		{
-			Result = DefWindowProcW(p1, p2, p3, p4);
-			if (Result == 0)
-			{
-				if (!Rendering)
-				{
-					Result = Render(p1, x, y);
-				}
-			}
+			x = 22;
+			y = 16;
+
+			Result = 0;
 		}
 		else
 		{
-			if (p2 == WM_LBUTTONUP)
+			if (p2 == WM_PAINT)
 			{
-				Result = LeftMouseButtonPressed(p1, p2, p3, p4);
-
-				LeftMouseState = false;
+				Result = DefWindowProcW(p1, p2, p3, p4);
+				if (Result == 0)
+				{
+					if (!Rendering)
+					{
+						Result = Render(p1, x, y);
+					}
+				}
 			}
 			else
 			{
-				if (p2 == WM_LBUTTONDOWN)
+				if (p2 == WM_LBUTTONUP)
 				{
-					LeftMouseState = true;
+					Result = LeftMouseButtonPressed(p1, p2, p3, p4);
 
-					Result = 0;
+					LeftMouseState = false;
 				}
 				else
 				{
-					if (p2 == WM_MOUSEMOVE)
+					if (p2 == WM_LBUTTONDOWN)
 					{
-						SetCursor(Cursor);
+						LeftMouseState = true;
 
-						Result = WindowScroll(p1, p2, p3, p4);
+						Result = 0;
 					}
 					else
 					{
-						Result = DefWindowProcW(p1, p2, p3, p4);
+						if (p2 == WM_MOUSEMOVE)
+						{
+							SetCursor(Cursor);
+
+							Result = WindowScroll(p1, p2, p3, p4);
+						}
+						else
+						{
+							Result = DefWindowProcW(p1, p2, p3, p4);
+						}
 					}
 				}
 			}
