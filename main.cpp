@@ -12,7 +12,7 @@
 #else // Russian
 #ifdef English
 #include "English\Localization.h"
-#else // Russian
+#else // None
 #error Localization does not exist.
 #endif // English
 
@@ -61,12 +61,19 @@ double ApplicationDrawingRefreshTime = 0;
 Integer WINAPI WinMain(HINSTANCE Instance, HINSTANCE, LPSTR, Integer)
 {
 	Constant Integer BaseDirectoryBufferLength = 50000;
-	WCHAR BaseDirectoryBuffer[BaseDirectoryBufferLength];
+	WCHAR *BaseDirectoryBuffer = new WCHAR[BaseDirectoryBufferLength];
 
-	ZeroMemory(&BaseDirectoryBuffer, BaseDirectoryBufferLength * DataSize(WCHAR));
+	if (BaseDirectoryBuffer == nullptr)
+	{
+		return 0;
+	}
+
+	ZeroMemory(BaseDirectoryBuffer, BaseDirectoryBufferLength * DataSize(WCHAR));
 
 	GetCurrentDirectoryW(BaseDirectoryBufferLength, BaseDirectoryBuffer);
 	BaseDirectory = std::wstring(BaseDirectoryBuffer);
+
+	delete[] BaseDirectoryBuffer;
 
 	WNDCLASSEXW WindowClass = { DataSize(WNDCLASSEXW), CS_CLASSDC, MessagesHandler, 0, 0, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, L"WindowClass", NULL };
 
@@ -94,9 +101,9 @@ Integer WINAPI WinMain(HINSTANCE Instance, HINSTANCE, LPSTR, Integer)
 
 	DWORD MaximumFramesPerSecond = 1000;
 
-	DWORD StartTicks = GetTickCount();
+	ULONGLONG StartTicks = GetTickCount64();
 
-	DWORD TicksPast = 0;
+	ULONGLONG TicksPast = 0;
 
 	PeekMessageW(&Message, NULL, 0, 0, PM_NOREMOVE);
 
@@ -116,7 +123,7 @@ Integer WINAPI WinMain(HINSTANCE Instance, HINSTANCE, LPSTR, Integer)
 					Render(WindowHandle, x, y);
 				}
 
-				DWORD EndTicks = GetTickCount();
+				ULONGLONG EndTicks = GetTickCount64();
 
 				TicksPast = EndTicks - StartTicks;
 
@@ -125,7 +132,7 @@ Integer WINAPI WinMain(HINSTANCE Instance, HINSTANCE, LPSTR, Integer)
 					RenderFrequency = FramesPerSecond;
 
 					FramesPerSecond = 1;
-					StartTicks = GetTickCount();
+					StartTicks = GetTickCount64();
 				}
 			}
 		}
@@ -215,7 +222,7 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 
 	Rendering = true;
 
-	DWORD ApplicationDrawingRefreshTimeStart = GetTickCount();
+	ULONGLONG ApplicationDrawingRefreshTimeStart = GetTickCount64();
 
 	SetCurrentDirectoryW(BaseDirectory.c_str());
 
@@ -866,7 +873,7 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 		Result = 1;
 	}
 
-	DWORD ApplicationDrawingRefreshTimeEnd = GetTickCount();
+	ULONGLONG ApplicationDrawingRefreshTimeEnd = GetTickCount64();
 
 	ApplicationDrawingRefreshTime += ApplicationDrawingRefreshTimeEnd - ApplicationDrawingRefreshTimeStart;
 
