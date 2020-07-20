@@ -337,82 +337,7 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 								HANDLE CurrentTableFile = CreateFileW(CurrentTable.c_str(), GENERIC_READ, 0, NULL, OPEN_EXISTING, 0, NULL);
 
 								if (CurrentTableFile != NULL)
-								{
-									/*/
-									DWORD BytesRead = 0;
-									Constant DWORD FileBufferSize = 50000;
-
-									WCHAR FileBuffer[FileBufferSize];
-									ZeroMemory(&FileBuffer, FileBufferSize * DataSize(WCHAR));
-
-									WCHAR FileSignatute = WCHAR();
-									ReadFile(CurrentTableFile, &FileSignatute, DataSize(WCHAR), &BytesRead, NULL);
-
-									if (ReadFile(CurrentTableFile, &FileBuffer, FileBufferSize * DataSize(WCHAR), &BytesRead, NULL) == TRUE)
-									{
-										std::wstring Table;
-
-										std::list<std::wstring> TableLines;
-
-										for (DWORD Item = 0; Item < BytesRead / DataSize(WCHAR); Item++)
-										{
-											WCHAR CurrentSymbol = FileBuffer[Item];
-
-											if (CurrentSymbol != L'\n' && CurrentSymbol != L'\r')
-											{
-												Table += CurrentSymbol;
-											}
-											else
-											{
-												if (Table.length() != 0)
-												{
-													TableLines.push_back(Table);
-												}
-
-												Table = std::wstring();
-											}
-										}
-
-										for (Automatic Iterator = TableLines.begin(); Iterator != TableLines.end(); Iterator++)
-										{
-											if (y + 1 - 30 / 2 - WindowScrollY >= ClientRectangle.top && y - 1 + 30 / 2 - WindowScrollY <= ClientRectangle.bottom)
-											{
-												if (Rectangle(DeviceContextHandle, 0 + 1, y + 1 - 30 / 2 - WindowScrollY, 200 - 1, y - 1 + 30 / 2 - WindowScrollY) != TRUE)
-												{
-													std::wstring Error(ErrorDrawingString);
-
-													Result = 1;
-
-													break;
-												}
-
-											}
-
-											if (y - WindowScrollY >= ClientRectangle.top && y - WindowScrollY <= ClientRectangle.bottom)
-											{
-												Constant std::wstring Text = *Iterator;
-												Integer TextLength = Integer(Text.length());
-												if (TextOutW(DeviceContextHandle, x + 10, y - WindowScrollY, Text.c_str(), TextLength) != TRUE)
-												{
-													std::wstring Error(ErrorDrawingString);
-
-													Result = 1;
-
-													break;
-												}
-											}
-
-											x += 0;
-											y += 30;
-										}
-									}
-									else
-									{
-										std::wstring Error(ErrorReadingFileString);
-
-										Result = 1;
-									}
-									/*/
+								{									
 									CloseHandle(CurrentTableFile);
 
 									ShellExecuteW(WindowHandle, std::wstring(L"Open").c_str(), CurrentTable.c_str(), NULL, CurrentDirectory.c_str(), SW_SHOW);
@@ -776,47 +701,53 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 					if (MemoryLeaksDebugingDone)
 					{
 						Constant Integer NumberBufferLength = 50000;
-						WCHAR NumberBuffer[NumberBufferLength];
+						WCHAR *NumberBuffer = new WCHAR[NumberBufferLength];
 
-						ZeroMemory(NumberBuffer, NumberBufferLength * DataSize(WCHAR));
-
-						_itow_s(RenderFrequency, NumberBuffer, NumberBufferLength, 10);
-
-						std::wstring NumberRenderFrequency(NumberBuffer);
-
-						for (Automatic iterator = NumberRenderFrequency.length(); iterator < 4; iterator++)
+						if (NumberBuffer != nullptr)
 						{
-							NumberRenderFrequency = std::wstring(L"0") + NumberRenderFrequency;
-						}
 
-						ZeroMemory(NumberBuffer, NumberBufferLength * DataSize(WCHAR));
+							ZeroMemory(NumberBuffer, NumberBufferLength * DataSize(WCHAR));
 
-						_itow_s(FramesPerSecond, NumberBuffer, NumberBufferLength, 10);
+							_itow_s(RenderFrequency, NumberBuffer, NumberBufferLength, 10);
 
-						std::wstring NumberRenderCurrentFrameNumber(NumberBuffer);
+							std::wstring NumberRenderFrequency(NumberBuffer);
 
-						for (Automatic iterator = NumberRenderCurrentFrameNumber.length(); iterator < 4; iterator++)
-						{
-							NumberRenderCurrentFrameNumber = std::wstring(L"0") + NumberRenderCurrentFrameNumber;
-						}
+							for (Automatic iterator = NumberRenderFrequency.length(); iterator < 4; iterator++)
+							{
+								NumberRenderFrequency = std::wstring(L"0") + NumberRenderFrequency;
+							}
 
-						std::wstring CurrentNumber;
-						CurrentNumber = std::wstring(FrameRateString) + NumberRenderFrequency + std::wstring(CurrentFrameString) + NumberRenderCurrentFrameNumber + std::wstring(PointString);
+							ZeroMemory(NumberBuffer, NumberBufferLength * DataSize(WCHAR));
 
-						Integer CurrentNumberLength = Integer(CurrentNumber.length());
+							_itow_s(FramesPerSecond, NumberBuffer, NumberBufferLength, 10);
 
-						RECTANGLE ClientRectangle;
-						ZeroMemory(&ClientRectangle, DataSize(RECTANGLE));
+							std::wstring NumberRenderCurrentFrameNumber(NumberBuffer);
 
-						GetClientRect(WindowHandle, &ClientRectangle);
+							for (Automatic iterator = NumberRenderCurrentFrameNumber.length(); iterator < 4; iterator++)
+							{
+								NumberRenderCurrentFrameNumber = std::wstring(L"0") + NumberRenderCurrentFrameNumber;
+							}
 
-						SetBkMode(DeviceContextHandle, TRANSPARENT);
+							std::wstring CurrentNumber;
+							CurrentNumber = std::wstring(FrameRateString) + NumberRenderFrequency + std::wstring(CurrentFrameString) + NumberRenderCurrentFrameNumber + std::wstring(PointString);
 
-						if (TextOutW(DeviceContextHandle, ClientRectangle.right - CurrentNumberLength * 10, ClientRectangle.bottom - 30, CurrentNumber.c_str(), CurrentNumberLength) != TRUE)
-						{
-							std::wstring Error(ErrorDrawingString);
+							Integer CurrentNumberLength = Integer(CurrentNumber.length());
 
-							Result = 1;
+							RECTANGLE ClientRectangle;
+							ZeroMemory(&ClientRectangle, DataSize(RECTANGLE));
+
+							GetClientRect(WindowHandle, &ClientRectangle);
+
+							SetBkMode(DeviceContextHandle, TRANSPARENT);
+
+							if (TextOutW(DeviceContextHandle, ClientRectangle.right - CurrentNumberLength * 10, ClientRectangle.bottom - 30, CurrentNumber.c_str(), CurrentNumberLength) != TRUE)
+							{
+								std::wstring Error(ErrorDrawingString);
+
+								Result = 1;
+							}
+
+							delete[] NumberBuffer;
 						}
 					}
 				}
@@ -1142,13 +1073,20 @@ std::wstring FormatTimeLunarStyle(WORD Year, WORD Month, WORD Day, WORD DayOfWee
 	std::wstring Result;
 
 	Constant Integer CurrentDirectoryBufferLength = 50000;
-	WCHAR CurrentDirectoryBuffer[CurrentDirectoryBufferLength];
+	WCHAR *CurrentDirectoryBuffer = new WCHAR[CurrentDirectoryBufferLength];
+
+	if (CurrentDirectoryBuffer == nullptr)
+	{
+		return Result;
+	}
 
 	ZeroMemory(CurrentDirectoryBuffer, CurrentDirectoryBufferLength * DataSize(WCHAR));
 
 	GetCurrentDirectoryW(CurrentDirectoryBufferLength, CurrentDirectoryBuffer);
 
 	std::wstring CurrentDirectory(CurrentDirectoryBuffer);
+
+	delete[] CurrentDirectoryBuffer;
 
 	SetCurrentDirectoryW(BaseDirectory.c_str());
 
@@ -1184,15 +1122,21 @@ std::wstring FormatTimeLunarStyle(WORD Year, WORD Month, WORD Day, WORD DayOfWee
 		SetCurrentDirectoryW(CurrentDirectory.c_str());
 
 		Constant Integer DayNumberBufferLength = 50000;
-		WCHAR DayNumberBuffer[DayNumberBufferLength];
+		WCHAR *DayNumberBuffer = new WCHAR[DayNumberBufferLength];
 
-		ZeroMemory(DayNumberBuffer, DayNumberBufferLength * DataSize(WCHAR));
+		if (DayNumberBuffer != nullptr)
+		{
 
-		_itow_s(Day, DayNumberBuffer, DayNumberBufferLength, 10);
+			ZeroMemory(DayNumberBuffer, DayNumberBufferLength * DataSize(WCHAR));
 
-		std::wstring DayNumber(DayNumberBuffer);
+			_itow_s(Day, DayNumberBuffer, DayNumberBufferLength, 10);
 
-		Result += std::wstring(L" ") + DayNumber + std::wstring(L" ") + StringDay;
+			std::wstring DayNumber(DayNumberBuffer);
+
+			Result += std::wstring(L" ") + DayNumber + std::wstring(L" ") + StringDay;
+
+			delete[] DayNumberBuffer;
+		}
 	}
 
 	{
@@ -1225,15 +1169,21 @@ std::wstring FormatTimeLunarStyle(WORD Year, WORD Month, WORD Day, WORD DayOfWee
 		SetCurrentDirectoryW(CurrentDirectory.c_str());
 
 		Constant Integer MonthNumberBufferLength = 50000;
-		WCHAR MonthNumberBuffer[MonthNumberBufferLength];
+		WCHAR *MonthNumberBuffer = new WCHAR[MonthNumberBufferLength];
 
-		ZeroMemory(MonthNumberBuffer, MonthNumberBufferLength * DataSize(WCHAR));
+		if (MonthNumberBuffer != nullptr)
+		{
 
-		_itow_s(Month, MonthNumberBuffer, MonthNumberBufferLength, 10);
+			ZeroMemory(MonthNumberBuffer, MonthNumberBufferLength * DataSize(WCHAR));
 
-		std::wstring MonthNumber(MonthNumberBuffer);
+			_itow_s(Month, MonthNumberBuffer, MonthNumberBufferLength, 10);
 
-		Result += std::wstring(L" ") + MonthNumber + std::wstring(L" ") + StringMonth;
+			std::wstring MonthNumber(MonthNumberBuffer);
+
+			Result += std::wstring(L" ") + MonthNumber + std::wstring(L" ") + StringMonth;
+
+			delete[] MonthNumberBuffer;
+		}
 	}
 
 	{
@@ -1266,15 +1216,21 @@ std::wstring FormatTimeLunarStyle(WORD Year, WORD Month, WORD Day, WORD DayOfWee
 		SetCurrentDirectoryW(CurrentDirectory.c_str());
 
 		Constant Integer YearNumberBufferLength = 50000;
-		WCHAR YearNumberBuffer[YearNumberBufferLength];
+		WCHAR *YearNumberBuffer = new WCHAR[YearNumberBufferLength];
 
-		ZeroMemory(YearNumberBuffer, YearNumberBufferLength * DataSize(WCHAR));
+		if (YearNumberBuffer != nullptr)
+		{
 
-		_itow_s(Year, YearNumberBuffer, YearNumberBufferLength, 10);
+			ZeroMemory(YearNumberBuffer, YearNumberBufferLength * DataSize(WCHAR));
 
-		std::wstring YearNumber(YearNumberBuffer);
+			_itow_s(Year, YearNumberBuffer, YearNumberBufferLength, 10);
 
-		Result += std::wstring(L" ") + YearNumber + std::wstring(L" ") + StringYear + std::wstring(L".");
+			std::wstring YearNumber(YearNumberBuffer);
+
+			Result += std::wstring(L" ") + YearNumber + std::wstring(L" ") + StringYear + std::wstring(L".");
+
+			delete[] YearNumberBuffer;
+		}
 	}
 
 	SetCurrentDirectoryW(CurrentDirectory.c_str());
@@ -1288,23 +1244,40 @@ std::wstring FormatTime(WORD Year, WORD Month, WORD Day, WORD DayOfWeek, WORD Ho
 
 	{
 		Constant DWORD CurrentDatabaseLength = 10000;
-		wchar_t CurrentDatabase[CurrentDatabaseLength];
+		WCHAR *CurrentDatabase = new WCHAR[CurrentDatabaseLength];
+
+		if (CurrentDatabase == nullptr)
+		{
+			return std::wstring();
+		}
+
+		ZeroMemory(CurrentDatabase, CurrentDatabaseLength * DataSize(WCHAR));
+
 		if (GetCurrentDirectoryW(CurrentDatabaseLength, CurrentDatabase) != 0)
 		{
 			std::wstring CurrentDirectory(CurrentDatabase);
 		}
+
+		delete[] CurrentDatabase;
 	}
 
 	std::wstring Result;
 
 	Constant Integer CurrentDirectoryBufferLength = 50000;
-	WCHAR CurrentDirectoryBuffer[CurrentDirectoryBufferLength];
+	WCHAR *CurrentDirectoryBuffer = new WCHAR[CurrentDirectoryBufferLength];
+
+	if (CurrentDirectoryBuffer == nullptr)
+	{
+		return Result;
+	}
 
 	ZeroMemory(CurrentDirectoryBuffer, CurrentDirectoryBufferLength * DataSize(WCHAR));
 
 	GetCurrentDirectoryW(CurrentDirectoryBufferLength, CurrentDirectoryBuffer);
 
 	std::wstring CurrentDirectory(CurrentDirectoryBuffer);
+
+	delete[] CurrentDirectoryBuffer;
 
 	SetCurrentDirectoryW(BaseDirectory.c_str());
 
@@ -1377,74 +1350,98 @@ std::wstring FormatTime(WORD Year, WORD Month, WORD Day, WORD DayOfWeek, WORD Ho
 
 	{
 		Constant Integer HourNumberBufferLength = 50000;
-		WCHAR HourNumberBuffer[HourNumberBufferLength];
+		WCHAR *HourNumberBuffer = new WCHAR[HourNumberBufferLength];
 
-		ZeroMemory(HourNumberBuffer, HourNumberBufferLength * DataSize(WCHAR));
-
-		_itow_s(Hour, HourNumberBuffer, HourNumberBufferLength, 10);
-
-		std::wstring HourNumber(HourNumberBuffer);
-
-		if (HourNumber.length() == 1)
+		if (HourNumberBuffer != nullptr)
 		{
-			HourNumber = std::wstring(L"0") + HourNumber;
-		}
 
-		Result += std::wstring(L" ") + HourNumber;
+			ZeroMemory(HourNumberBuffer, HourNumberBufferLength * DataSize(WCHAR));
+
+			_itow_s(Hour, HourNumberBuffer, HourNumberBufferLength, 10);
+
+			std::wstring HourNumber(HourNumberBuffer);
+
+			if (HourNumber.length() == 1)
+			{
+				HourNumber = std::wstring(L"0") + HourNumber;
+			}
+
+			Result += std::wstring(L" ") + HourNumber;
+
+			delete[] HourNumberBuffer;
+		}
 	}
 
 	{
 		Constant Integer MinuteNumberBufferLength = 50000;
-		WCHAR MinuteNumberBuffer[MinuteNumberBufferLength];
+		WCHAR *MinuteNumberBuffer = new WCHAR[MinuteNumberBufferLength];
 
-		ZeroMemory(MinuteNumberBuffer, MinuteNumberBufferLength * DataSize(WCHAR));
-
-		_itow_s(Minute, MinuteNumberBuffer, MinuteNumberBufferLength, 10);
-
-		std::wstring MinuteNumber(MinuteNumberBuffer);
-
-		if (MinuteNumber.length() == 1)
+		if (MinuteNumberBuffer != nullptr)
 		{
-			MinuteNumber = std::wstring(L"0") + MinuteNumber;
-		}
 
-		Result += std::wstring(L":") + MinuteNumber;
+			ZeroMemory(MinuteNumberBuffer, MinuteNumberBufferLength * DataSize(WCHAR));
+
+			_itow_s(Minute, MinuteNumberBuffer, MinuteNumberBufferLength, 10);
+
+			std::wstring MinuteNumber(MinuteNumberBuffer);
+
+			if (MinuteNumber.length() == 1)
+			{
+				MinuteNumber = std::wstring(L"0") + MinuteNumber;
+			}
+
+			Result += std::wstring(L":") + MinuteNumber;
+
+			delete[] MinuteNumberBuffer;
+		}
 	}
 
 	{
 		Constant Integer SecondNumberBufferLength = 50000;
-		WCHAR SecondNumberBuffer[SecondNumberBufferLength];
+		WCHAR *SecondNumberBuffer = new WCHAR[SecondNumberBufferLength];
 
-		ZeroMemory(SecondNumberBuffer, SecondNumberBufferLength * DataSize(WCHAR));
-
-		_itow_s(Second, SecondNumberBuffer, SecondNumberBufferLength, 10);
-
-		std::wstring SecondNumber(SecondNumberBuffer);
-
-		if (SecondNumber.length() == 1)
+		if (SecondNumberBuffer != nullptr)
 		{
-			SecondNumber = std::wstring(L"0") + SecondNumber;
-		}
 
-		Result += std::wstring(L":") + SecondNumber;
+			ZeroMemory(SecondNumberBuffer, SecondNumberBufferLength * DataSize(WCHAR));
+
+			_itow_s(Second, SecondNumberBuffer, SecondNumberBufferLength, 10);
+
+			std::wstring SecondNumber(SecondNumberBuffer);
+
+			if (SecondNumber.length() == 1)
+			{
+				SecondNumber = std::wstring(L"0") + SecondNumber;
+			}
+
+			Result += std::wstring(L":") + SecondNumber;
+
+			delete[] SecondNumberBuffer;
+		}
 	}
 
 	{
 		Constant Integer DayNumberBufferLength = 50000;
-		WCHAR DayNumberBuffer[DayNumberBufferLength];
+		WCHAR *DayNumberBuffer = new WCHAR[DayNumberBufferLength];
 
-		ZeroMemory(DayNumberBuffer, DayNumberBufferLength * DataSize(WCHAR));
-
-		_itow_s(Day, DayNumberBuffer, DayNumberBufferLength, 10);
-
-		std::wstring DayNumber(DayNumberBuffer);
-
-		if (DayNumber.length() == 1)
+		if (DayNumberBuffer != nullptr)
 		{
-			DayNumber = std::wstring(L"0") + DayNumber;
-		}
 
-		Result += std::wstring(L" ") + DayNumber;
+			ZeroMemory(DayNumberBuffer, DayNumberBufferLength * DataSize(WCHAR));
+
+			_itow_s(Day, DayNumberBuffer, DayNumberBufferLength, 10);
+
+			std::wstring DayNumber(DayNumberBuffer);
+
+			if (DayNumber.length() == 1)
+			{
+				DayNumber = std::wstring(L"0") + DayNumber;
+			}
+
+			Result += std::wstring(L" ") + DayNumber;
+
+			delete[] DayNumberBuffer;
+		}
 	}
 
 	{
@@ -1533,15 +1530,21 @@ std::wstring FormatTime(WORD Year, WORD Month, WORD Day, WORD DayOfWeek, WORD Ho
 		SetCurrentDirectoryW(CurrentDirectory.c_str());
 
 		Constant Integer YearNumberBufferLength = 50000;
-		WCHAR YearNumberBuffer[YearNumberBufferLength];
+		WCHAR *YearNumberBuffer = new WCHAR[YearNumberBufferLength];
 
-		ZeroMemory(YearNumberBuffer, YearNumberBufferLength * DataSize(WCHAR));
+		if (YearNumberBuffer != nullptr)
+		{
 
-		_itow_s(Year, YearNumberBuffer, YearNumberBufferLength, 10);
+			ZeroMemory(YearNumberBuffer, YearNumberBufferLength * DataSize(WCHAR));
 
-		std::wstring YearNumber(YearNumberBuffer);
+			_itow_s(Year, YearNumberBuffer, YearNumberBufferLength, 10);
 
-		Result += std::wstring(L" ") + YearNumber + std::wstring(L" ") + StringYear + std::wstring(L".");
+			std::wstring YearNumber(YearNumberBuffer);
+
+			Result += std::wstring(L" ") + YearNumber + std::wstring(L" ") + StringYear + std::wstring(L".");
+
+			delete[] YearNumberBuffer;
+		}
 	}
 
 	SetCurrentDirectoryW(CurrentDirectory.c_str());
@@ -1555,24 +1558,41 @@ std::wstring FormatDay(WORD Day)
 
 	{
 		Constant DWORD CurrentDatabaseLength = 10000;
-		wchar_t CurrentDatabase[CurrentDatabaseLength];
+		WCHAR *CurrentDatabase = new WCHAR[CurrentDatabaseLength];
+
+		if (CurrentDatabase == nullptr)
+		{
+			return std::wstring();
+		}
+
+		ZeroMemory(CurrentDatabase, CurrentDatabaseLength * DataSize(WCHAR));
+
 		if (GetCurrentDirectoryW(CurrentDatabaseLength, CurrentDatabase) != 0)
 		{
 			std::wstring CurrentDirectory(CurrentDatabase);
 		}
+
+		delete[] CurrentDatabase;
 	}
 
 	std::wstring Result;
 
 	{
 		Constant Integer DayNumberBufferLength = 50000;
-		WCHAR DayNumberBuffer[DayNumberBufferLength];
+		WCHAR *DayNumberBuffer = new WCHAR[DayNumberBufferLength];
+
+		if (DayNumberBuffer == nullptr)
+		{
+			return Result;
+		}
 
 		ZeroMemory(DayNumberBuffer, DayNumberBufferLength * DataSize(WCHAR));
 
 		_itow_s(Day, DayNumberBuffer, DayNumberBufferLength, 10);
 
 		std::wstring DayNumber(DayNumberBuffer);
+
+		delete[] DayNumberBuffer;
 
 		if (DayNumber.length() == 1)
 		{
@@ -1591,23 +1611,40 @@ std::wstring FormatDayOfWeek(WORD DayOfWeek)
 
 	{
 		Constant DWORD CurrentDatabaseLength = 10000;
-		wchar_t CurrentDatabase[CurrentDatabaseLength];
+		WCHAR *CurrentDatabase = new WCHAR[CurrentDatabaseLength];
+
+		if (CurrentDatabase == nullptr)
+		{
+			return std::wstring();
+		}
+
+		ZeroMemory(CurrentDatabase, CurrentDatabaseLength * DataSize(WCHAR));
+
 		if (GetCurrentDirectoryW(CurrentDatabaseLength, CurrentDatabase) != 0)
 		{
 			std::wstring CurrentDirectory(CurrentDatabase);
 		}
+
+		delete[] CurrentDatabase;
 	}
 
 	std::wstring Result;
 
 	Constant Integer CurrentDirectoryBufferLength = 50000;
-	WCHAR CurrentDirectoryBuffer[CurrentDirectoryBufferLength];
+	WCHAR *CurrentDirectoryBuffer = new WCHAR[CurrentDirectoryBufferLength];
+
+	if (CurrentDirectoryBuffer == nullptr)
+	{
+		return Result;
+	}
 
 	ZeroMemory(CurrentDirectoryBuffer, CurrentDirectoryBufferLength * DataSize(WCHAR));
 
 	GetCurrentDirectoryW(CurrentDirectoryBufferLength, CurrentDirectoryBuffer);
 
 	std::wstring CurrentDirectory(CurrentDirectoryBuffer);
+
+	delete[] CurrentDirectoryBuffer;
 
 	SetCurrentDirectoryW(BaseDirectory.c_str());
 
@@ -1687,23 +1724,40 @@ std::wstring FormatMonth(WORD Month)
 
 	{
 		Constant DWORD CurrentDatabaseLength = 10000;
-		wchar_t CurrentDatabase[CurrentDatabaseLength];
+		WCHAR* CurrentDatabase = new WCHAR[CurrentDatabaseLength];
+
+		if (CurrentDatabase == nullptr)
+		{
+			return std::wstring();
+		}
+
+		ZeroMemory(CurrentDatabase, CurrentDatabaseLength * DataSize(WCHAR));
+
 		if (GetCurrentDirectoryW(CurrentDatabaseLength, CurrentDatabase) != 0)
 		{
 			std::wstring CurrentDirectory(CurrentDatabase);
 		}
+
+		delete[] CurrentDatabase;
 	}
 
 	std::wstring Result;
 
 	Constant Integer CurrentDirectoryBufferLength = 50000;
-	WCHAR CurrentDirectoryBuffer[CurrentDirectoryBufferLength];
+	WCHAR *CurrentDirectoryBuffer = new WCHAR[CurrentDirectoryBufferLength];
+
+	if (CurrentDirectoryBuffer == nullptr)
+	{
+		return Result;
+	}
 
 	ZeroMemory(CurrentDirectoryBuffer, CurrentDirectoryBufferLength * DataSize(WCHAR));
 
 	GetCurrentDirectoryW(CurrentDirectoryBufferLength, CurrentDirectoryBuffer);
 
 	std::wstring CurrentDirectory(CurrentDirectoryBuffer);
+
+	delete[] CurrentDirectoryBuffer;
 
 	SetCurrentDirectoryW(BaseDirectory.c_str());
 
@@ -1774,21 +1828,38 @@ std::wstring FormatYear(WORD Year)
 
 	{
 		Constant DWORD CurrentDatabaseLength = 10000;
-		wchar_t CurrentDatabase[CurrentDatabaseLength];
+		WCHAR* CurrentDatabase = new WCHAR[CurrentDatabaseLength];
+
+		if (CurrentDatabase == nullptr)
+		{
+			return std::wstring();
+		}
+
+		ZeroMemory(CurrentDatabase, CurrentDatabaseLength * DataSize(WCHAR));
+
 		if (GetCurrentDirectoryW(CurrentDatabaseLength, CurrentDatabase) != 0)
 		{
 			std::wstring CurrentDirectory(CurrentDatabase);
 		}
+
+		delete[] CurrentDatabase;
 	}
 
 	Constant Integer YearNumberBufferLength = 50000;
-	WCHAR YearNumberBuffer[YearNumberBufferLength];
+	WCHAR *YearNumberBuffer = new WCHAR[YearNumberBufferLength];
+
+	if (YearNumberBuffer == nullptr)
+	{
+		return std::wstring();
+	}
 
 	ZeroMemory(YearNumberBuffer, YearNumberBufferLength * DataSize(WCHAR));
 
 	_itow_s(Year, YearNumberBuffer, YearNumberBufferLength, 10);
 
 	std::wstring YearNumber(YearNumberBuffer);
+
+	delete[] YearNumberBuffer;
 
 	return YearNumber;
 }
