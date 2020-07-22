@@ -16,7 +16,7 @@ Constant std::wstring ErrorDeletingContextString(L"Failure when attempting to de
 Constant std::wstring ErrorCreatingContextString(L"Failure when trying to get drawing context.");
 
 Constant std::wstring LondonTimeString(L"London time:");
-Constant std::wstring LocalTimeString(L"Local time время:");
+Constant std::wstring LocalTimeString(L"Local time:");
 Constant std::wstring FrameRateString(L"Frame rate ");
 Constant std::wstring CurrentFrameString(L", current frame ");
 Constant std::wstring PointString(L".");
