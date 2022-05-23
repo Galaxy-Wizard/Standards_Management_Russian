@@ -79,7 +79,7 @@ WCHAR* GetThisPath(WCHAR* destination, DWORD size)
 VOID SetCurrentDirectoryApplicationDirectory()
 {
 	const DWORD destination_size = 50000;
-	WCHAR *destination = new WCHAR[destination_size];
+	WCHAR* destination = new WCHAR[destination_size];
 
 	if (destination != nullptr)
 	{
@@ -759,6 +759,74 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 							}
 						}
 
+						//	10 Years
+						{
+							if (Rectangle(DeviceContextHandle, 250 + 40 * 7 + 42, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20, 250 + 40 * 7 + 42 + 40, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20 + 30) != TRUE)
+							{
+								std::wstring Error(ErrorDrawingString);
+
+								Result = 1;
+							}
+							if (Rectangle(DeviceContextHandle, 250 + 40 * 7 + 42, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20 + 30 + 5, 250 + 40 * 7 + 42 + 40, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20 + 30 + 5 + 30) != TRUE)
+							{
+								std::wstring Error(ErrorDrawingString);
+
+								Result = 1;
+							}
+
+							std::wstring CurrentUp(L"+10");
+							Integer CurrentUpLength = Integer(CurrentUp.length());
+							if (TextOutW(DeviceContextHandle, 250 + 40 * 7 + 42 + 7, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20 + 5, CurrentUp.c_str(), CurrentUpLength) != TRUE)
+							{
+								std::wstring Error(ErrorDrawingString);
+
+								Result = 1;
+							}
+
+							std::wstring CurrentDown(L"-10");
+							Integer CurrentDownLength = Integer(CurrentDown.length());
+							if (TextOutW(DeviceContextHandle, 250 + 40 * 7 + 42 + 7, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20 + 30 + 5 + 5, CurrentDown.c_str(), CurrentDownLength) != TRUE)
+							{
+								std::wstring Error(ErrorDrawingString);
+
+								Result = 1;
+							}
+						}
+
+						//	100 Years
+						{
+							if (Rectangle(DeviceContextHandle, 250 + 40 * 7 + 42 + 42, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20, 250 + 40 * 7 + 42 + 42 + 40, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20 + 30) != TRUE)
+							{
+								std::wstring Error(ErrorDrawingString);
+
+								Result = 1;
+							}
+							if (Rectangle(DeviceContextHandle, 250 + 40 * 7 + 42 + 42, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20 + 30 + 5, 250 + 40 * 7 + 42 + 42 + 40, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20 + 30 + 5 + 30) != TRUE)
+							{
+								std::wstring Error(ErrorDrawingString);
+
+								Result = 1;
+							}
+
+							std::wstring CurrentUp(L"+100");
+							Integer CurrentUpLength = Integer(CurrentUp.length());
+							if (TextOutW(DeviceContextHandle, 250 + 40 * 7 + 42 + 42 + 7, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20 + 5, CurrentUp.c_str(), CurrentUpLength) != TRUE)
+							{
+								std::wstring Error(ErrorDrawingString);
+
+								Result = 1;
+							}
+
+							std::wstring CurrentDown(L"-100");
+							Integer CurrentDownLength = Integer(CurrentDown.length());
+							if (TextOutW(DeviceContextHandle, 250 + 40 * 7 + 42 + 42 + 7, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20 + 30 + 5 + 5, CurrentDown.c_str(), CurrentDownLength) != TRUE)
+							{
+								std::wstring Error(ErrorDrawingString);
+
+								Result = 1;
+							}
+						}
+
 						if (DeleteObject(Font) != TRUE)
 						{
 							std::wstring Error(ErrorDeletingFontString);
@@ -1196,12 +1264,192 @@ LRESULT LeftMouseButtonPressed(HWND p1, UINT p2, WPARAM p3, LPARAM p4)
 								}
 								else
 								{
-									CurrentTable = std::wstring();
-									WindowScrollY = 0;
-
-									if (!Rendering)
+									//	10 Years Up
+									if (
+										CoordinateX > 250 + 40 * 7 + 42 &&
+										CoordinateX < 250 + 40 * 7 + 42 + 40 &&
+										CoordinateY > 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20 + 5 &&
+										CoordinateY < 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20 + 5 + 30
+										)
 									{
-										Result = Render(p1, x, y);
+										//	std::wstring CurrentUp;
+										CTime CalendarTimeCurrent(CalendarTime);
+
+										Automatic SavedYear = CalendarTimeCurrent.GetYear();
+										Automatic SavedMonth = CalendarTimeCurrent.GetMonth();
+										Automatic SavedDay = CalendarTimeCurrent.GetDay();
+
+										for (; SavedYear + 10 > CalendarTimeCurrent.GetYear();)
+										{
+											CalendarTimeCurrent += CTimeSpan(1, 0, 0, 0);
+										}
+
+										SavedYear = CalendarTimeCurrent.GetYear();
+										for (; SavedMonth > CalendarTimeCurrent.GetMonth() && SavedYear == CalendarTimeCurrent.GetYear();)
+										{
+											CalendarTimeCurrent += CTimeSpan(1, 0, 0, 0);
+										}
+
+										for (; SavedDay >= CalendarTimeCurrent.GetDay() && SavedMonth == CalendarTimeCurrent.GetMonth();)
+										{
+											CalendarTimeCurrent += CTimeSpan(1, 0, 0, 0);
+										}
+										if (SavedDay != CalendarTimeCurrent.GetDay())
+										{
+											CalendarTimeCurrent -= CTimeSpan(1, 0, 0, 0);
+										}
+
+										CalendarTimeCurrent.GetAsSystemTime(CalendarTime);
+
+										if (!Rendering)
+										{
+											Result = Render(p1, x, y);
+										}
+									}
+									else
+									{
+										//	10 Year Down
+										if (
+											CoordinateX > 250 + 40 * 7 + 42 &&
+											CoordinateX < 250 + 40 * 7 + 42 + 40 &&
+											CoordinateY > 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20 + 30 + 5 &&
+											CoordinateY < 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20 + 30 + 5 + 30
+											)
+										{
+											//	std::wstring CurrentDown;
+											CTime CalendarTimeCurrent(CalendarTime);
+
+											Automatic SavedYear = CalendarTimeCurrent.GetYear();
+											Automatic SavedMonth = CalendarTimeCurrent.GetMonth();
+											Automatic SavedDay = CalendarTimeCurrent.GetDay();
+
+											for (; SavedYear - 10 < CalendarTimeCurrent.GetYear();)
+											{
+												CalendarTimeCurrent -= CTimeSpan(1, 0, 0, 0);
+											}
+
+											SavedYear = CalendarTimeCurrent.GetYear();
+											for (; SavedMonth < CalendarTimeCurrent.GetMonth() && SavedYear == CalendarTimeCurrent.GetYear();)
+											{
+												CalendarTimeCurrent -= CTimeSpan(1, 0, 0, 0);
+											}
+
+											for (; SavedDay < CalendarTimeCurrent.GetDay() && SavedMonth == CalendarTimeCurrent.GetMonth();)
+											{
+												CalendarTimeCurrent -= CTimeSpan(1, 0, 0, 0);
+											}
+											if (SavedDay != CalendarTimeCurrent.GetDay())
+											{
+												CalendarTimeCurrent += CTimeSpan(1, 0, 0, 0);
+											}
+
+											CalendarTimeCurrent.GetAsSystemTime(CalendarTime);
+
+											if (!Rendering)
+											{
+												Result = Render(p1, x, y);
+											}
+										}
+										else
+										{
+											//	100 Years Up
+											if (
+												CoordinateX > 250 + 40 * 7 + 42 + 42 &&
+												CoordinateX < 250 + 40 * 7 + 42 + 42 + 40 &&
+												CoordinateY > 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20 + 5 &&
+												CoordinateY < 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20 + 5 + 30
+												)
+											{
+												//	std::wstring CurrentUp;
+												CTime CalendarTimeCurrent(CalendarTime);
+
+												Automatic SavedYear = CalendarTimeCurrent.GetYear();
+												Automatic SavedMonth = CalendarTimeCurrent.GetMonth();
+												Automatic SavedDay = CalendarTimeCurrent.GetDay();
+
+												for (; SavedYear + 100 > CalendarTimeCurrent.GetYear();)
+												{
+													CalendarTimeCurrent += CTimeSpan(1, 0, 0, 0);
+												}
+
+												SavedYear = CalendarTimeCurrent.GetYear();
+												for (; SavedMonth > CalendarTimeCurrent.GetMonth() && SavedYear == CalendarTimeCurrent.GetYear();)
+												{
+													CalendarTimeCurrent += CTimeSpan(1, 0, 0, 0);
+												}
+
+												for (; SavedDay >= CalendarTimeCurrent.GetDay() && SavedMonth == CalendarTimeCurrent.GetMonth();)
+												{
+													CalendarTimeCurrent += CTimeSpan(1, 0, 0, 0);
+												}
+												if (SavedDay != CalendarTimeCurrent.GetDay())
+												{
+													CalendarTimeCurrent -= CTimeSpan(1, 0, 0, 0);
+												}
+
+												CalendarTimeCurrent.GetAsSystemTime(CalendarTime);
+
+												if (!Rendering)
+												{
+													Result = Render(p1, x, y);
+												}
+											}
+											else
+											{
+												//	100 Year Down
+												if (
+													CoordinateX > 250 + 40 * 7 + 42 + 42 &&
+													CoordinateX < 250 + 40 * 7 + 42 + 42 + 40 &&
+													CoordinateY > 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20 + 30 + 5 &&
+													CoordinateY < 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20 + 30 + 5 + 30
+													)
+												{
+													//	std::wstring CurrentDown;
+													CTime CalendarTimeCurrent(CalendarTime);
+
+													Automatic SavedYear = CalendarTimeCurrent.GetYear();
+													Automatic SavedMonth = CalendarTimeCurrent.GetMonth();
+													Automatic SavedDay = CalendarTimeCurrent.GetDay();
+
+													for (; SavedYear - 100 < CalendarTimeCurrent.GetYear();)
+													{
+														CalendarTimeCurrent -= CTimeSpan(1, 0, 0, 0);
+													}
+
+													SavedYear = CalendarTimeCurrent.GetYear();
+													for (; SavedMonth < CalendarTimeCurrent.GetMonth() && SavedYear == CalendarTimeCurrent.GetYear();)
+													{
+														CalendarTimeCurrent -= CTimeSpan(1, 0, 0, 0);
+													}
+
+													for (; SavedDay < CalendarTimeCurrent.GetDay() && SavedMonth == CalendarTimeCurrent.GetMonth();)
+													{
+														CalendarTimeCurrent -= CTimeSpan(1, 0, 0, 0);
+													}
+													if (SavedDay != CalendarTimeCurrent.GetDay())
+													{
+														CalendarTimeCurrent += CTimeSpan(1, 0, 0, 0);
+													}
+
+													CalendarTimeCurrent.GetAsSystemTime(CalendarTime);
+
+													if (!Rendering)
+													{
+														Result = Render(p1, x, y);
+													}
+												}
+												else
+												{
+													CurrentTable = std::wstring();
+													WindowScrollY = 0;
+
+													if (!Rendering)
+													{
+														Result = Render(p1, x, y);
+													}
+												}
+											}
+										}
 									}
 								}
 							}
