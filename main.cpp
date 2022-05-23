@@ -30,7 +30,7 @@ VOID SetCurrentDirectoryApplicationDirectory();
 
 //	Year	100 - 9999
 //	Month	1 - 12
-//	Day	0 - 31
+//	Day		0 - 31
 
 #define YearRestrictionsCheck {if (CalendarTimeCurrent.GetYear() > 9999 || CalendarTimeCurrent.GetYear() < 100 || (CalendarTimeCurrent.GetYear() == 9999 && CalendarTimeCurrent.GetMonth() == 12 && CalendarTimeCurrent.GetDay() == 30)) { goto YearRestrictionsCheckErrorExit; }}
 
