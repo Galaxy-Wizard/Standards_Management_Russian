@@ -1,0 +1,15 @@
+Allowed:
+1) Copying.
+2) Developing.
+3) Commercial usage by 'Diagnostic Centers'.
+4) Selling developed versions by 'Diagnostic Centers'.
+
+Disallowed:
+1) Commercial usage.
+2) Hacking.
+3) Change existing catalogs structure.
+
+Note:
+1) "Developing" is modification of C++ files, adding Catalogs, adding of C++ files.
+2) "Hacking" is modification of executional files.
+3) Allowing rules have major priority under disallowing rules.
