@@ -8,6 +8,7 @@
 #include <Shlwapi.h>
 #pragma comment(lib, "shlwapi.lib")
 
+#include <ATLComTime.h>
 
 #include "Manager.h"
 
@@ -24,6 +25,14 @@
 
 WCHAR* GetThisPath(WCHAR* destination, DWORD size);
 VOID SetCurrentDirectoryApplicationDirectory();
+
+//	YearRestrictionsCheck
+
+//	Year	100 - 9999
+//	Month	1 - 12
+//	Day	0 - 31
+
+#define YearRestrictionsCheck {if (CalendarTimeCurrent.GetYear() > 9999 || CalendarTimeCurrent.GetYear() < 100 || (CalendarTimeCurrent.GetYear() == 9999 && CalendarTimeCurrent.GetMonth() == 12 && CalendarTimeCurrent.GetDay() == 30)) { goto YearRestrictionsCheckErrorExit; }}
 
 
 Constant bool MemoryLeaksDebuging = true;
@@ -93,7 +102,7 @@ VOID SetCurrentDirectoryApplicationDirectory()
 	}
 }
 
-Integer WINAPI WinMain(HINSTANCE Instance, HINSTANCE, LPSTR, Integer)
+Integer APIENTRY WinMain(HINSTANCE Instance, HINSTANCE, LPSTR, Integer)
 {
 	SetCurrentDirectoryApplicationDirectory();
 
@@ -118,7 +127,7 @@ Integer WINAPI WinMain(HINSTANCE Instance, HINSTANCE, LPSTR, Integer)
 
 	HWND WindowHandle = CreateWindowW(L"WindowClass", WindowCaptionString.c_str(),
 		WS_OVERLAPPEDWINDOW | WS_VISIBLE,
-		0, 0, 700, 900, NULL/*/GetDesktopWindow()/*/, NULL, WindowClass.hInstance, NULL);
+		0, 0, 900, 900, NULL/*/GetDesktopWindow()/*/, NULL, WindowClass.hInstance, NULL);
 
 	Automatic CURSOR_ARROW = MAKEINTRESOURCEW(32512);
 
@@ -580,16 +589,16 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 
 						std::list<std::list<std::wstring>> CalendarMonthStrings;
 
-						ATL::CTime TimeCalculator(CalendarTime);
+						ATL::COleDateTime TimeCalculator(CalendarTime);
 
-						ATL::CTimeSpan TimeSpanCalculator1(1, 0, 0, 0);
-						ATL::CTimeSpan TimeSpanCalculator2(TimeCalculator.GetDay(), 0, 0, 0);
+						ATL::COleDateTimeSpan TimeSpanCalculator1(1, 0, 0, 0);
+						ATL::COleDateTimeSpan TimeSpanCalculator2(TimeCalculator.GetDay(), 0, 0, 0);
 
 						TimeCalculator += TimeSpanCalculator1;
 						TimeCalculator -= TimeSpanCalculator2;
 
-						ATL::CTime TimeCalculatorIterator(TimeCalculator);
-						ATL::CTimeSpan TimeSpanCalculatorDay(1, 0, 0, 0);
+						ATL::COleDateTime TimeCalculatorIterator(TimeCalculator);
+						ATL::COleDateTimeSpan TimeSpanCalculatorDay(1, 0, 0, 0);
 
 						Automatic CurrentCalculatorDayOfWeek = TimeCalculatorIterator.GetDayOfWeek();
 
@@ -827,6 +836,40 @@ LRESULT Render(HWND WindowHandle, Integer x, Integer y)
 							}
 						}
 
+						//	1000 Years
+						{
+							if (Rectangle(DeviceContextHandle, 250 + 40 * 7 + 42 + 42 + 42, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20, 250 + 40 * 7 + 42 + 42 + 42 + 40, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20 + 30) != TRUE)
+							{
+								std::wstring Error(ErrorDrawingString);
+
+								Result = 1;
+							}
+							if (Rectangle(DeviceContextHandle, 250 + 40 * 7 + 42 + 42 + 42, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20 + 30 + 5, 250 + 40 * 7 + 42 + 42 + 42 + 40, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20 + 30 + 5 + 30) != TRUE)
+							{
+								std::wstring Error(ErrorDrawingString);
+
+								Result = 1;
+							}
+
+							std::wstring CurrentUp(L"+1000");
+							Integer CurrentUpLength = Integer(CurrentUp.length());
+							if (TextOutW(DeviceContextHandle, 250 + 40 * 7 + 42 + 42 + 42 + 2, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20 + 5, CurrentUp.c_str(), CurrentUpLength) != TRUE)
+							{
+								std::wstring Error(ErrorDrawingString);
+
+								Result = 1;
+							}
+
+							std::wstring CurrentDown(L"-1000");
+							Integer CurrentDownLength = Integer(CurrentDown.length());
+							if (TextOutW(DeviceContextHandle, 250 + 40 * 7 + 42 + 42 + 42 + 2, 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20 + 30 + 5 + 5, CurrentDown.c_str(), CurrentDownLength) != TRUE)
+							{
+								std::wstring Error(ErrorDrawingString);
+
+								Result = 1;
+							}
+						}
+
 						if (DeleteObject(Font) != TRUE)
 						{
 							std::wstring Error(ErrorDeletingFontString);
@@ -968,128 +1011,115 @@ LRESULT LeftMouseButtonPressed(HWND p1, UINT p2, WPARAM p3, LPARAM p4)
 
 	LRESULT Result = 0;
 
-	if (CoordinateX >= 0 && CoordinateX < 200)
+	COleDateTime CalendarTimeCurrentSaved(CalendarTime);
+
+	for (;;)
 	{
-
-		bool StringFound = false;
-		bool TableSelected = false;
-
-		std::wstring SelectedString;
-
-		Integer IteratorY = 16;
-
-		for (Automatic Iterator = CurrentStandardsManager.begin(); Iterator != CurrentStandardsManager.end(); Iterator++)
+		if (CoordinateX >= 0 && CoordinateX < 200)
 		{
-			if ((CoordinateY >= IteratorY + 1 - 30 / 2 - WindowScrollY) && (CoordinateY <= IteratorY - 1 + 30 / 2 - WindowScrollY))
+
+			bool StringFound = false;
+			bool TableSelected = false;
+
+			std::wstring SelectedString;
+
+			Integer IteratorY = 16;
+
+			for (Automatic Iterator = CurrentStandardsManager.begin(); Iterator != CurrentStandardsManager.end(); Iterator++)
 			{
-				SelectedString = *Iterator;
-
-				StringFound = true;
-
-				break;
-			}
-
-			IteratorY += 30;
-		}
-
-		if (StringFound)
-		{
-			if (SelectedString == L".")
-			{
-				CurrentDirectory = CatalogString;
-			}
-			else
-				if (SelectedString == L"..")
+				if ((CoordinateY >= IteratorY + 1 - 30 / 2 - WindowScrollY) && (CoordinateY <= IteratorY - 1 + 30 / 2 - WindowScrollY))
 				{
-					std::wstring CurrentDirectoryWorking = CurrentDirectory;
-					for (; CurrentDirectoryWorking.length() != 0;)
-					{
-						if (CurrentDirectoryWorking.back() == L'\\')
-						{
-							CurrentDirectoryWorking.pop_back();
-							break;
-						}
-						CurrentDirectoryWorking.pop_back();
-					}
+					SelectedString = *Iterator;
 
-					CurrentDirectory = CurrentDirectoryWorking;
+					StringFound = true;
 
-					CurrentTable = std::wstring();
+					break;
+				}
+
+				IteratorY += 30;
+			}
+
+			if (StringFound)
+			{
+				if (SelectedString == L".")
+				{
+					CurrentDirectory = CatalogString;
 				}
 				else
-				{
-					std::wstring CurrenStringWorking = SelectedString;
-
-					for (; CurrenStringWorking.length() != 0;)
+					if (SelectedString == L"..")
 					{
-						if (CurrenStringWorking.back() == L'.')
+						std::wstring CurrentDirectoryWorking = CurrentDirectory;
+						for (; CurrentDirectoryWorking.length() != 0;)
 						{
-							CurrenStringWorking.pop_back();
-							TableSelected = true;
-
-							break;
+							if (CurrentDirectoryWorking.back() == L'\\')
+							{
+								CurrentDirectoryWorking.pop_back();
+								break;
+							}
+							CurrentDirectoryWorking.pop_back();
 						}
-						CurrenStringWorking.pop_back();
-					}
 
-					if (TableSelected)
-					{
-						CurrentTable = SelectedString;
-					}
-					else
-					{
-						CurrentDirectory += L"\\";
-						CurrentDirectory += SelectedString;
+						CurrentDirectory = CurrentDirectoryWorking;
 
 						CurrentTable = std::wstring();
 					}
+					else
+					{
+						std::wstring CurrenStringWorking = SelectedString;
+
+						for (; CurrenStringWorking.length() != 0;)
+						{
+							if (CurrenStringWorking.back() == L'.')
+							{
+								CurrenStringWorking.pop_back();
+								TableSelected = true;
+
+								break;
+							}
+							CurrenStringWorking.pop_back();
+						}
+
+						if (TableSelected)
+						{
+							CurrentTable = SelectedString;
+						}
+						else
+						{
+							CurrentDirectory += L"\\";
+							CurrentDirectory += SelectedString;
+
+							CurrentTable = std::wstring();
+						}
+					}
+
+				if (CurrentDirectory.length() == 0)
+				{
+					CurrentDirectory = CatalogString;
+
+					CurrentTable = std::wstring();
 				}
-
-			if (CurrentDirectory.length() == 0)
-			{
-				CurrentDirectory = CatalogString;
-
-				CurrentTable = std::wstring();
 			}
-		}
 
-		if (!Rendering)
-		{
-			Result = Render(p1, x, y);
-		}
-	}
-	else
-	{
-		if (CoordinateX >= 200 && CoordinateX < 240)
-		{
-
+			if (!Rendering)
+			{
+				Result = Render(p1, x, y);
+			}
 		}
 		else
 		{
-			if (CoordinateX > 250 && CoordinateX < 250 + 40 && CoordinateY > 16 + 30 + 30 + 30 + 50 && CoordinateY < 16 + 30 + 30 + 30 + 50 + 100)
+			if (CoordinateX >= 200 && CoordinateX < 240)
 			{
-				//	std::wstring CurrentBackward;
 
-				CTime CalendarTimeCurrent(CalendarTime);
-
-				CalendarTimeCurrent -= CTimeSpan(1, 0, 0, 0);
-
-				CalendarTimeCurrent.GetAsSystemTime(CalendarTime);
-
-				if (!Rendering)
-				{
-					Result = Render(p1, x, y);
-				}
 			}
 			else
 			{
-				if (CoordinateX > 250 + 210 - 40 && CoordinateX < 250 + 210 && CoordinateY > 16 + 30 + 30 + 30 + 50 && CoordinateY < 16 + 30 + 30 + 30 + 50 + 100)
+				if (CoordinateX > 250 && CoordinateX < 250 + 40 && CoordinateY > 16 + 30 + 30 + 30 + 50 && CoordinateY < 16 + 30 + 30 + 30 + 50 + 100)
 				{
-					//	std::wstring CurrentForward;
+					//	std::wstring CurrentBackward;
 
-					CTime CalendarTimeCurrent(CalendarTime);
+					COleDateTime CalendarTimeCurrent(CalendarTime);
 
-					CalendarTimeCurrent += CTimeSpan(1, 0, 0, 0);
+					CalendarTimeCurrent -= COleDateTimeSpan(1, 0, 0, 0);
 
 					CalendarTimeCurrent.GetAsSystemTime(CalendarTime);
 
@@ -1100,34 +1130,13 @@ LRESULT LeftMouseButtonPressed(HWND p1, UINT p2, WPARAM p3, LPARAM p4)
 				}
 				else
 				{
-					//	Month Up
-					if (
-						CoordinateX > 250 + 40 * 7 &&
-						CoordinateX < 250 + 40 * 7 + 40 &&
-						CoordinateY > 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 &&
-						CoordinateY < 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 30
-						)
+					if (CoordinateX > 250 + 210 - 40 && CoordinateX < 250 + 210 && CoordinateY > 16 + 30 + 30 + 30 + 50 && CoordinateY < 16 + 30 + 30 + 30 + 50 + 100)
 					{
-						//	std::wstring CurrentUp;
-						CTime CalendarTimeCurrent(CalendarTime);
+						//	std::wstring CurrentForward;
 
-						Automatic SavedMonth = CalendarTimeCurrent.GetMonth();
-						Automatic SavedDay = CalendarTimeCurrent.GetDay();
+						COleDateTime CalendarTimeCurrent(CalendarTime);
 
-						for (; SavedMonth == CalendarTimeCurrent.GetMonth();)
-						{
-							CalendarTimeCurrent += CTimeSpan(1, 0, 0, 0);
-						}
-
-						SavedMonth = CalendarTimeCurrent.GetMonth();
-						for (; SavedDay > CalendarTimeCurrent.GetDay() && SavedMonth == CalendarTimeCurrent.GetMonth();)
-						{
-							CalendarTimeCurrent += CTimeSpan(1, 0, 0, 0);
-						}
-						if (SavedMonth != CalendarTimeCurrent.GetMonth())
-						{
-							CalendarTimeCurrent -= CTimeSpan(1, 0, 0, 0);
-						}
+						CalendarTimeCurrent += COleDateTimeSpan(1, 0, 0, 0);
 
 						CalendarTimeCurrent.GetAsSystemTime(CalendarTime);
 
@@ -1138,33 +1147,36 @@ LRESULT LeftMouseButtonPressed(HWND p1, UINT p2, WPARAM p3, LPARAM p4)
 					}
 					else
 					{
-						//	Month Down
+						//	Month Up
 						if (
 							CoordinateX > 250 + 40 * 7 &&
 							CoordinateX < 250 + 40 * 7 + 40 &&
-							CoordinateY > 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 30 + 5 &&
-							CoordinateY < 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 30 + 5 + 30
+							CoordinateY > 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 &&
+							CoordinateY < 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 30
 							)
 						{
-							//	std::wstring CurrentDown;
-							CTime CalendarTimeCurrent(CalendarTime);
+							//	std::wstring CurrentUp;
+							COleDateTime CalendarTimeCurrent(CalendarTime);
 
 							Automatic SavedMonth = CalendarTimeCurrent.GetMonth();
 							Automatic SavedDay = CalendarTimeCurrent.GetDay();
 
 							for (; SavedMonth == CalendarTimeCurrent.GetMonth();)
 							{
-								CalendarTimeCurrent -= CTimeSpan(1, 0, 0, 0);
+								CalendarTimeCurrent += COleDateTimeSpan(1, 0, 0, 0);
+								YearRestrictionsCheck
 							}
 
 							SavedMonth = CalendarTimeCurrent.GetMonth();
-							for (; SavedDay < CalendarTimeCurrent.GetDay() && SavedMonth == CalendarTimeCurrent.GetMonth();)
+							for (; SavedDay > CalendarTimeCurrent.GetDay() && SavedMonth == CalendarTimeCurrent.GetMonth();)
 							{
-								CalendarTimeCurrent -= CTimeSpan(1, 0, 0, 0);
+								CalendarTimeCurrent += COleDateTimeSpan(1, 0, 0, 0);
+								YearRestrictionsCheck
 							}
 							if (SavedMonth != CalendarTimeCurrent.GetMonth())
 							{
-								CalendarTimeCurrent += CTimeSpan(1, 0, 0, 0);
+								CalendarTimeCurrent -= COleDateTimeSpan(1, 0, 0, 0);
+								YearRestrictionsCheck
 							}
 
 							CalendarTimeCurrent.GetAsSystemTime(CalendarTime);
@@ -1176,39 +1188,36 @@ LRESULT LeftMouseButtonPressed(HWND p1, UINT p2, WPARAM p3, LPARAM p4)
 						}
 						else
 						{
-							//	Year Up
+							//	Month Down
 							if (
 								CoordinateX > 250 + 40 * 7 &&
 								CoordinateX < 250 + 40 * 7 + 40 &&
-								CoordinateY > 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20 + 5 &&
-								CoordinateY < 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20 + 5 + 30
+								CoordinateY > 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 30 + 5 &&
+								CoordinateY < 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 30 + 5 + 30
 								)
 							{
-								//	std::wstring CurrentUp;
-								CTime CalendarTimeCurrent(CalendarTime);
+								//	std::wstring CurrentDown;
+								COleDateTime CalendarTimeCurrent(CalendarTime);
 
-								Automatic SavedYear = CalendarTimeCurrent.GetYear();
 								Automatic SavedMonth = CalendarTimeCurrent.GetMonth();
 								Automatic SavedDay = CalendarTimeCurrent.GetDay();
 
-								for (; SavedYear == CalendarTimeCurrent.GetYear();)
+								for (; SavedMonth == CalendarTimeCurrent.GetMonth();)
 								{
-									CalendarTimeCurrent += CTimeSpan(1, 0, 0, 0);
+									CalendarTimeCurrent -= COleDateTimeSpan(1, 0, 0, 0);
+									YearRestrictionsCheck
 								}
 
-								SavedYear = CalendarTimeCurrent.GetYear();
-								for (; SavedMonth > CalendarTimeCurrent.GetMonth() && SavedYear == CalendarTimeCurrent.GetYear();)
+								SavedMonth = CalendarTimeCurrent.GetMonth();
+								for (; SavedDay < CalendarTimeCurrent.GetDay() && SavedMonth == CalendarTimeCurrent.GetMonth();)
 								{
-									CalendarTimeCurrent += CTimeSpan(1, 0, 0, 0);
+									CalendarTimeCurrent -= COleDateTimeSpan(1, 0, 0, 0);
+									YearRestrictionsCheck
 								}
-
-								for (; SavedDay > CalendarTimeCurrent.GetDay() && SavedMonth == CalendarTimeCurrent.GetMonth();)
+								if (SavedMonth != CalendarTimeCurrent.GetMonth())
 								{
-									CalendarTimeCurrent += CTimeSpan(1, 0, 0, 0);
-								}
-								if (SavedDay != CalendarTimeCurrent.GetDay())
-								{
-									CalendarTimeCurrent -= CTimeSpan(1, 0, 0, 0);
+									CalendarTimeCurrent += COleDateTimeSpan(1, 0, 0, 0);
+									YearRestrictionsCheck
 								}
 
 								CalendarTimeCurrent.GetAsSystemTime(CalendarTime);
@@ -1220,16 +1229,16 @@ LRESULT LeftMouseButtonPressed(HWND p1, UINT p2, WPARAM p3, LPARAM p4)
 							}
 							else
 							{
-								//	Year Down
+								//	Year Up
 								if (
 									CoordinateX > 250 + 40 * 7 &&
 									CoordinateX < 250 + 40 * 7 + 40 &&
-									CoordinateY > 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20 + 30 + 5 &&
-									CoordinateY < 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20 + 30 + 5 + 30
+									CoordinateY > 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20 + 5 &&
+									CoordinateY < 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20 + 5 + 30
 									)
 								{
-									//	std::wstring CurrentDown;
-									CTime CalendarTimeCurrent(CalendarTime);
+									//	std::wstring CurrentUp;
+									COleDateTime CalendarTimeCurrent(CalendarTime);
 
 									Automatic SavedYear = CalendarTimeCurrent.GetYear();
 									Automatic SavedMonth = CalendarTimeCurrent.GetMonth();
@@ -1237,22 +1246,26 @@ LRESULT LeftMouseButtonPressed(HWND p1, UINT p2, WPARAM p3, LPARAM p4)
 
 									for (; SavedYear == CalendarTimeCurrent.GetYear();)
 									{
-										CalendarTimeCurrent -= CTimeSpan(1, 0, 0, 0);
+										CalendarTimeCurrent += COleDateTimeSpan(1, 0, 0, 0);
+										YearRestrictionsCheck
 									}
 
 									SavedYear = CalendarTimeCurrent.GetYear();
-									for (; SavedMonth < CalendarTimeCurrent.GetMonth() && SavedYear == CalendarTimeCurrent.GetYear();)
+									for (; SavedMonth > CalendarTimeCurrent.GetMonth() && SavedYear == CalendarTimeCurrent.GetYear();)
 									{
-										CalendarTimeCurrent -= CTimeSpan(1, 0, 0, 0);
+										CalendarTimeCurrent += COleDateTimeSpan(1, 0, 0, 0);
+										YearRestrictionsCheck
 									}
 
-									for (; SavedDay < CalendarTimeCurrent.GetDay() && SavedMonth == CalendarTimeCurrent.GetMonth();)
+									for (; SavedDay > CalendarTimeCurrent.GetDay() && SavedMonth == CalendarTimeCurrent.GetMonth();)
 									{
-										CalendarTimeCurrent -= CTimeSpan(1, 0, 0, 0);
+										CalendarTimeCurrent += COleDateTimeSpan(1, 0, 0, 0);
+										YearRestrictionsCheck
 									}
 									if (SavedDay != CalendarTimeCurrent.GetDay())
 									{
-										CalendarTimeCurrent += CTimeSpan(1, 0, 0, 0);
+										CalendarTimeCurrent -= COleDateTimeSpan(1, 0, 0, 0);
+										YearRestrictionsCheck
 									}
 
 									CalendarTimeCurrent.GetAsSystemTime(CalendarTime);
@@ -1264,39 +1277,43 @@ LRESULT LeftMouseButtonPressed(HWND p1, UINT p2, WPARAM p3, LPARAM p4)
 								}
 								else
 								{
-									//	10 Years Up
+									//	Year Down
 									if (
-										CoordinateX > 250 + 40 * 7 + 42 &&
-										CoordinateX < 250 + 40 * 7 + 42 + 40 &&
-										CoordinateY > 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20 + 5 &&
-										CoordinateY < 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20 + 5 + 30
+										CoordinateX > 250 + 40 * 7 &&
+										CoordinateX < 250 + 40 * 7 + 40 &&
+										CoordinateY > 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20 + 30 + 5 &&
+										CoordinateY < 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20 + 30 + 5 + 30
 										)
 									{
-										//	std::wstring CurrentUp;
-										CTime CalendarTimeCurrent(CalendarTime);
+										//	std::wstring CurrentDown;
+										COleDateTime CalendarTimeCurrent(CalendarTime);
 
 										Automatic SavedYear = CalendarTimeCurrent.GetYear();
 										Automatic SavedMonth = CalendarTimeCurrent.GetMonth();
 										Automatic SavedDay = CalendarTimeCurrent.GetDay();
 
-										for (; SavedYear + 10 > CalendarTimeCurrent.GetYear();)
+										for (; SavedYear == CalendarTimeCurrent.GetYear();)
 										{
-											CalendarTimeCurrent += CTimeSpan(1, 0, 0, 0);
+											CalendarTimeCurrent -= COleDateTimeSpan(1, 0, 0, 0);
+											YearRestrictionsCheck
 										}
 
 										SavedYear = CalendarTimeCurrent.GetYear();
-										for (; SavedMonth > CalendarTimeCurrent.GetMonth() && SavedYear == CalendarTimeCurrent.GetYear();)
+										for (; SavedMonth < CalendarTimeCurrent.GetMonth() && SavedYear == CalendarTimeCurrent.GetYear();)
 										{
-											CalendarTimeCurrent += CTimeSpan(1, 0, 0, 0);
+											CalendarTimeCurrent -= COleDateTimeSpan(1, 0, 0, 0);
+											YearRestrictionsCheck
 										}
 
-										for (; SavedDay >= CalendarTimeCurrent.GetDay() && SavedMonth == CalendarTimeCurrent.GetMonth();)
+										for (; SavedDay < CalendarTimeCurrent.GetDay() && SavedMonth == CalendarTimeCurrent.GetMonth();)
 										{
-											CalendarTimeCurrent += CTimeSpan(1, 0, 0, 0);
+											CalendarTimeCurrent -= COleDateTimeSpan(1, 0, 0, 0);
+											YearRestrictionsCheck
 										}
 										if (SavedDay != CalendarTimeCurrent.GetDay())
 										{
-											CalendarTimeCurrent -= CTimeSpan(1, 0, 0, 0);
+											CalendarTimeCurrent += COleDateTimeSpan(1, 0, 0, 0);
+											YearRestrictionsCheck
 										}
 
 										CalendarTimeCurrent.GetAsSystemTime(CalendarTime);
@@ -1308,39 +1325,43 @@ LRESULT LeftMouseButtonPressed(HWND p1, UINT p2, WPARAM p3, LPARAM p4)
 									}
 									else
 									{
-										//	10 Year Down
+										//	10 Years Up
 										if (
 											CoordinateX > 250 + 40 * 7 + 42 &&
 											CoordinateX < 250 + 40 * 7 + 42 + 40 &&
-											CoordinateY > 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20 + 30 + 5 &&
-											CoordinateY < 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20 + 30 + 5 + 30
+											CoordinateY > 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20 + 5 &&
+											CoordinateY < 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20 + 5 + 30
 											)
 										{
-											//	std::wstring CurrentDown;
-											CTime CalendarTimeCurrent(CalendarTime);
+											//	std::wstring CurrentUp;
+											COleDateTime CalendarTimeCurrent(CalendarTime);
 
 											Automatic SavedYear = CalendarTimeCurrent.GetYear();
 											Automatic SavedMonth = CalendarTimeCurrent.GetMonth();
 											Automatic SavedDay = CalendarTimeCurrent.GetDay();
 
-											for (; SavedYear - 10 < CalendarTimeCurrent.GetYear();)
+											for (; SavedYear + 10 > CalendarTimeCurrent.GetYear();)
 											{
-												CalendarTimeCurrent -= CTimeSpan(1, 0, 0, 0);
+												CalendarTimeCurrent += COleDateTimeSpan(1, 0, 0, 0);
+												YearRestrictionsCheck
 											}
 
 											SavedYear = CalendarTimeCurrent.GetYear();
-											for (; SavedMonth < CalendarTimeCurrent.GetMonth() && SavedYear == CalendarTimeCurrent.GetYear();)
+											for (; SavedMonth > CalendarTimeCurrent.GetMonth() && SavedYear == CalendarTimeCurrent.GetYear();)
 											{
-												CalendarTimeCurrent -= CTimeSpan(1, 0, 0, 0);
+												CalendarTimeCurrent += COleDateTimeSpan(1, 0, 0, 0);
+												YearRestrictionsCheck
 											}
 
-											for (; SavedDay < CalendarTimeCurrent.GetDay() && SavedMonth == CalendarTimeCurrent.GetMonth();)
+											for (; SavedDay >= CalendarTimeCurrent.GetDay() && SavedMonth == CalendarTimeCurrent.GetMonth();)
 											{
-												CalendarTimeCurrent -= CTimeSpan(1, 0, 0, 0);
+												CalendarTimeCurrent += COleDateTimeSpan(1, 0, 0, 0);
+												YearRestrictionsCheck
 											}
 											if (SavedDay != CalendarTimeCurrent.GetDay())
 											{
-												CalendarTimeCurrent += CTimeSpan(1, 0, 0, 0);
+												CalendarTimeCurrent -= COleDateTimeSpan(1, 0, 0, 0);
+												YearRestrictionsCheck
 											}
 
 											CalendarTimeCurrent.GetAsSystemTime(CalendarTime);
@@ -1352,39 +1373,43 @@ LRESULT LeftMouseButtonPressed(HWND p1, UINT p2, WPARAM p3, LPARAM p4)
 										}
 										else
 										{
-											//	100 Years Up
+											//	10 Year Down
 											if (
-												CoordinateX > 250 + 40 * 7 + 42 + 42 &&
-												CoordinateX < 250 + 40 * 7 + 42 + 42 + 40 &&
-												CoordinateY > 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20 + 5 &&
-												CoordinateY < 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20 + 5 + 30
+												CoordinateX > 250 + 40 * 7 + 42 &&
+												CoordinateX < 250 + 40 * 7 + 42 + 40 &&
+												CoordinateY > 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20 + 30 + 5 &&
+												CoordinateY < 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20 + 30 + 5 + 30
 												)
 											{
-												//	std::wstring CurrentUp;
-												CTime CalendarTimeCurrent(CalendarTime);
+												//	std::wstring CurrentDown;
+												COleDateTime CalendarTimeCurrent(CalendarTime);
 
 												Automatic SavedYear = CalendarTimeCurrent.GetYear();
 												Automatic SavedMonth = CalendarTimeCurrent.GetMonth();
 												Automatic SavedDay = CalendarTimeCurrent.GetDay();
 
-												for (; SavedYear + 100 > CalendarTimeCurrent.GetYear();)
+												for (; SavedYear - 10 < CalendarTimeCurrent.GetYear();)
 												{
-													CalendarTimeCurrent += CTimeSpan(1, 0, 0, 0);
+													CalendarTimeCurrent -= COleDateTimeSpan(1, 0, 0, 0);
+													YearRestrictionsCheck
 												}
 
 												SavedYear = CalendarTimeCurrent.GetYear();
-												for (; SavedMonth > CalendarTimeCurrent.GetMonth() && SavedYear == CalendarTimeCurrent.GetYear();)
+												for (; SavedMonth < CalendarTimeCurrent.GetMonth() && SavedYear == CalendarTimeCurrent.GetYear();)
 												{
-													CalendarTimeCurrent += CTimeSpan(1, 0, 0, 0);
+													CalendarTimeCurrent -= COleDateTimeSpan(1, 0, 0, 0);
+													YearRestrictionsCheck
 												}
 
-												for (; SavedDay >= CalendarTimeCurrent.GetDay() && SavedMonth == CalendarTimeCurrent.GetMonth();)
+												for (; SavedDay < CalendarTimeCurrent.GetDay() && SavedMonth == CalendarTimeCurrent.GetMonth();)
 												{
-													CalendarTimeCurrent += CTimeSpan(1, 0, 0, 0);
+													CalendarTimeCurrent -= COleDateTimeSpan(1, 0, 0, 0);
+													YearRestrictionsCheck
 												}
 												if (SavedDay != CalendarTimeCurrent.GetDay())
 												{
-													CalendarTimeCurrent -= CTimeSpan(1, 0, 0, 0);
+													CalendarTimeCurrent += COleDateTimeSpan(1, 0, 0, 0);
+													YearRestrictionsCheck
 												}
 
 												CalendarTimeCurrent.GetAsSystemTime(CalendarTime);
@@ -1396,39 +1421,43 @@ LRESULT LeftMouseButtonPressed(HWND p1, UINT p2, WPARAM p3, LPARAM p4)
 											}
 											else
 											{
-												//	100 Year Down
+												//	100 Years Up
 												if (
 													CoordinateX > 250 + 40 * 7 + 42 + 42 &&
 													CoordinateX < 250 + 40 * 7 + 42 + 42 + 40 &&
-													CoordinateY > 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20 + 30 + 5 &&
-													CoordinateY < 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20 + 30 + 5 + 30
+													CoordinateY > 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20 + 5 &&
+													CoordinateY < 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20 + 5 + 30
 													)
 												{
-													//	std::wstring CurrentDown;
-													CTime CalendarTimeCurrent(CalendarTime);
+													//	std::wstring CurrentUp;
+													COleDateTime CalendarTimeCurrent(CalendarTime);
 
 													Automatic SavedYear = CalendarTimeCurrent.GetYear();
 													Automatic SavedMonth = CalendarTimeCurrent.GetMonth();
 													Automatic SavedDay = CalendarTimeCurrent.GetDay();
 
-													for (; SavedYear - 100 < CalendarTimeCurrent.GetYear();)
+													for (; SavedYear + 100 > CalendarTimeCurrent.GetYear();)
 													{
-														CalendarTimeCurrent -= CTimeSpan(1, 0, 0, 0);
+														CalendarTimeCurrent += COleDateTimeSpan(1, 0, 0, 0);
+														YearRestrictionsCheck
 													}
 
 													SavedYear = CalendarTimeCurrent.GetYear();
-													for (; SavedMonth < CalendarTimeCurrent.GetMonth() && SavedYear == CalendarTimeCurrent.GetYear();)
+													for (; SavedMonth > CalendarTimeCurrent.GetMonth() && SavedYear == CalendarTimeCurrent.GetYear();)
 													{
-														CalendarTimeCurrent -= CTimeSpan(1, 0, 0, 0);
+														CalendarTimeCurrent += COleDateTimeSpan(1, 0, 0, 0);
+														YearRestrictionsCheck
 													}
 
-													for (; SavedDay < CalendarTimeCurrent.GetDay() && SavedMonth == CalendarTimeCurrent.GetMonth();)
+													for (; SavedDay >= CalendarTimeCurrent.GetDay() && SavedMonth == CalendarTimeCurrent.GetMonth();)
 													{
-														CalendarTimeCurrent -= CTimeSpan(1, 0, 0, 0);
+														CalendarTimeCurrent += COleDateTimeSpan(1, 0, 0, 0);
+														YearRestrictionsCheck
 													}
 													if (SavedDay != CalendarTimeCurrent.GetDay())
 													{
-														CalendarTimeCurrent += CTimeSpan(1, 0, 0, 0);
+														CalendarTimeCurrent -= COleDateTimeSpan(1, 0, 0, 0);
+														YearRestrictionsCheck
 													}
 
 													CalendarTimeCurrent.GetAsSystemTime(CalendarTime);
@@ -1440,12 +1469,159 @@ LRESULT LeftMouseButtonPressed(HWND p1, UINT p2, WPARAM p3, LPARAM p4)
 												}
 												else
 												{
-													CurrentTable = std::wstring();
-													WindowScrollY = 0;
-
-													if (!Rendering)
+													//	100 Year Down
+													if (
+														CoordinateX > 250 + 40 * 7 + 42 + 42 &&
+														CoordinateX < 250 + 40 * 7 + 42 + 42 + 40 &&
+														CoordinateY > 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20 + 30 + 5 &&
+														CoordinateY < 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20 + 30 + 5 + 30
+														)
 													{
-														Result = Render(p1, x, y);
+														//	std::wstring CurrentDown;
+														COleDateTime CalendarTimeCurrent(CalendarTime);
+
+														Automatic SavedYear = CalendarTimeCurrent.GetYear();
+														Automatic SavedMonth = CalendarTimeCurrent.GetMonth();
+														Automatic SavedDay = CalendarTimeCurrent.GetDay();
+
+														for (; SavedYear - 100 < CalendarTimeCurrent.GetYear();)
+														{
+															CalendarTimeCurrent -= COleDateTimeSpan(1, 0, 0, 0);
+															YearRestrictionsCheck
+														}
+
+														SavedYear = CalendarTimeCurrent.GetYear();
+														for (; SavedMonth < CalendarTimeCurrent.GetMonth() && SavedYear == CalendarTimeCurrent.GetYear();)
+														{
+															CalendarTimeCurrent -= COleDateTimeSpan(1, 0, 0, 0);
+															YearRestrictionsCheck
+														}
+
+														for (; SavedDay < CalendarTimeCurrent.GetDay() && SavedMonth == CalendarTimeCurrent.GetMonth();)
+														{
+															CalendarTimeCurrent -= COleDateTimeSpan(1, 0, 0, 0);
+															YearRestrictionsCheck
+														}
+														if (SavedDay != CalendarTimeCurrent.GetDay())
+														{
+															CalendarTimeCurrent += COleDateTimeSpan(1, 0, 0, 0);
+															YearRestrictionsCheck
+														}
+
+														CalendarTimeCurrent.GetAsSystemTime(CalendarTime);
+
+														if (!Rendering)
+														{
+															Result = Render(p1, x, y);
+														}
+													}
+													else
+													{
+														//	1000 Years Up
+														if (
+															CoordinateX > 250 + 40 * 7 + 42 + 42 + 42 &&
+															CoordinateX < 250 + 40 * 7 + 42 + 42 + 42 + 40 &&
+															CoordinateY > 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20 + 5 &&
+															CoordinateY < 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20 + 5 + 30
+															)
+														{
+															//	std::wstring CurrentUp;
+															COleDateTime CalendarTimeCurrent(CalendarTime);
+
+															Automatic SavedYear = CalendarTimeCurrent.GetYear();
+															Automatic SavedMonth = CalendarTimeCurrent.GetMonth();
+															Automatic SavedDay = CalendarTimeCurrent.GetDay();
+
+															for (; SavedYear + 1000 > CalendarTimeCurrent.GetYear();)
+															{
+																CalendarTimeCurrent += COleDateTimeSpan(1, 0, 0, 0);
+																YearRestrictionsCheck
+															}
+
+															SavedYear = CalendarTimeCurrent.GetYear();
+															for (; SavedMonth > CalendarTimeCurrent.GetMonth() && SavedYear == CalendarTimeCurrent.GetYear();)
+															{
+																CalendarTimeCurrent += COleDateTimeSpan(1, 0, 0, 0);
+																YearRestrictionsCheck
+															}
+
+															for (; SavedDay >= CalendarTimeCurrent.GetDay() && SavedMonth == CalendarTimeCurrent.GetMonth();)
+															{
+																CalendarTimeCurrent += COleDateTimeSpan(1, 0, 0, 0);
+																YearRestrictionsCheck
+															}
+															if (SavedDay != CalendarTimeCurrent.GetDay())
+															{
+																CalendarTimeCurrent -= COleDateTimeSpan(1, 0, 0, 0);
+																YearRestrictionsCheck
+															}
+
+															CalendarTimeCurrent.GetAsSystemTime(CalendarTime);
+
+															if (!Rendering)
+															{
+																Result = Render(p1, x, y);
+															}
+														}
+														else
+														{
+															//	1000 Year Down
+															if (
+																CoordinateX > 250 + 40 * 7 + 42 + 42 + 42 &&
+																CoordinateX < 250 + 40 * 7 + 42 + 42 + 42 + 40 &&
+																CoordinateY > 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20 + 30 + 5 &&
+																CoordinateY < 16 + 30 + 30 + 30 + 50 + 100 + 10 + 40 * 6 + 20 + 64 + 20 + 30 + 5 + 30
+																)
+															{
+																//	std::wstring CurrentDown;
+																COleDateTime CalendarTimeCurrent(CalendarTime);
+
+																Automatic SavedYear = CalendarTimeCurrent.GetYear();
+																Automatic SavedMonth = CalendarTimeCurrent.GetMonth();
+																Automatic SavedDay = CalendarTimeCurrent.GetDay();
+
+																for (; SavedYear - 1000 < CalendarTimeCurrent.GetYear();)
+																{
+																	CalendarTimeCurrent -= COleDateTimeSpan(1, 0, 0, 0);
+																	YearRestrictionsCheck
+																}
+
+																SavedYear = CalendarTimeCurrent.GetYear();
+																for (; SavedMonth < CalendarTimeCurrent.GetMonth() && SavedYear == CalendarTimeCurrent.GetYear();)
+																{
+																	CalendarTimeCurrent -= COleDateTimeSpan(1, 0, 0, 0);
+																	YearRestrictionsCheck
+																}
+
+																for (; SavedDay < CalendarTimeCurrent.GetDay() && SavedMonth == CalendarTimeCurrent.GetMonth();)
+																{
+																	CalendarTimeCurrent -= COleDateTimeSpan(1, 0, 0, 0);
+																	YearRestrictionsCheck
+																}
+																if (SavedDay != CalendarTimeCurrent.GetDay())
+																{
+																	CalendarTimeCurrent += COleDateTimeSpan(1, 0, 0, 0);
+																	YearRestrictionsCheck
+																}
+
+																CalendarTimeCurrent.GetAsSystemTime(CalendarTime);
+
+																if (!Rendering)
+																{
+																	Result = Render(p1, x, y);
+																}
+															}
+															else
+															{
+																CurrentTable = std::wstring();
+																WindowScrollY = 0;
+
+																if (!Rendering)
+																{
+																	Result = Render(p1, x, y);
+																}
+															}
+														}
 													}
 												}
 											}
@@ -1458,6 +1634,23 @@ LRESULT LeftMouseButtonPressed(HWND p1, UINT p2, WPARAM p3, LPARAM p4)
 				}
 			}
 		}
+
+		break;
+
+		YearRestrictionsCheckErrorExit:
+		{
+			CalendarTimeCurrentSaved.GetAsSystemTime(CalendarTime);
+
+			CurrentTable = std::wstring();
+			WindowScrollY = 0;
+
+			if (!Rendering)
+			{
+				Result = Render(p1, x, y);
+			}
+		}
+
+		break;
 	}
 
 	return Result;
