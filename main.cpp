@@ -18,9 +18,12 @@
 
 #endif // Russian
 
-
 Constant bool MemoryLeaksDebuging = true;
 Constant bool MemoryLeaksDebugingDone = true;
+
+
+WCHAR* GetThisPath(WCHAR* destination, DWORD size);
+VOID SetCurrentDirectoryApplicationDirectory();
 
 LRESULT CALLBACK MessagesHandler(HWND, UINT, WPARAM, LPARAM);
 
@@ -58,8 +61,33 @@ HCURSOR Cursor = NULL;
 
 double ApplicationDrawingRefreshTime = 0;
 
+WCHAR* GetThisPath(WCHAR* destination, DWORD size)
+{
+	if (destination == nullptr) return NULL;
+
+	DWORD length = GetModuleFileNameW(NULL, destination, size);
+
+	PathRemoveFileSpecW(destination);
+
+	return destination;
+}
+
+VOID SetCurrentDirectoryApplicationDirectory()
+{
+	const DWORD destination_size = 50000;
+	WCHAR destination[destination_size];
+
+	ZeroMemory(destination, destination_size * sizeof(WCHAR));
+
+	GetThisPath(destination, destination_size);
+
+	SetCurrentDirectoryW(destination);
+}
+
 Integer WINAPI WinMain(HINSTANCE Instance, HINSTANCE, LPSTR, Integer)
 {
+	SetCurrentDirectoryApplicationDirectory();
+
 	Constant Integer BaseDirectoryBufferLength = 50000;
 	WCHAR *BaseDirectoryBuffer = new WCHAR[BaseDirectoryBufferLength];
 
